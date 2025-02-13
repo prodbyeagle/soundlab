@@ -1,7 +1,6 @@
 // Settings.tsx
 import Layout from '../components/Layout';
 import FileImporter from '../components/FileImporter';
-import ThemeSwitcher from '../components/ThemeSwitcher';
 
 const Settings = () => {
 	return (
@@ -17,13 +16,6 @@ const Settings = () => {
 							Sound Library
 						</h2>
 						<FileImporter />
-					</section>
-
-					<section className='rounded-xl border border-neutral-900 bg-neutral-950 p-6'>
-						<h2 className='mb-4 text-xl font-medium text-neutral-100'>
-							Appearance
-						</h2>
-						<ThemeSwitcher />
 					</section>
 				</div>
 			</div>

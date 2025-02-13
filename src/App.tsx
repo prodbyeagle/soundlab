@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeContext';
 import { SoundProvider } from './context/SoundContext';
 import Library from './pages/Library';
 import Settings from './pages/Settings';
@@ -7,9 +6,8 @@ import Titlebar from './components/Titlebar';
 
 const App = () => {
 	return (
-		<div className='font-main'>
+		<div className='font-main bg-neutral-950 text-neutral-100'>
 			<Titlebar />
-			<ThemeProvider>
 				<SoundProvider>
 					<BrowserRouter>
 						<Routes>
@@ -18,7 +16,6 @@ const App = () => {
 						</Routes>
 					</BrowserRouter>
 				</SoundProvider>
-			</ThemeProvider>
 		</div>
 	);
 };
