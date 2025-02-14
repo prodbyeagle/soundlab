@@ -11,8 +11,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             import::import_folder,
             settings::get_imported_sounds,
+            settings::get_imported_path,
             settings::add_imported_sound,
-            settings::remove_imported_sound,
+            settings::remove_imported_path,
             settings::load_settings,
             settings::save_settings,
             cache::init_cache,
