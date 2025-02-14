@@ -38,7 +38,7 @@ pub async fn scan_directory(path: &Path) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-pub async fn import_folder(folder_path: String) -> Result<(), String> {
+pub async fn import_folder(folder_path: String) -> Result<Vec<String>, String> {
     let root_path = Path::new(&folder_path);
     if !root_path.exists() || !root_path.is_dir() {
         return Err(format!("📂 Ungültiges Verzeichnis: {}", folder_path));
@@ -47,11 +47,11 @@ pub async fn import_folder(folder_path: String) -> Result<(), String> {
     let scanned_files = scan_directory(root_path).await?;
     let mut settings = load_settings()?;
 
-    settings.imported_sounds.extend(scanned_files);
+    settings.imported_sounds.extend(scanned_files.clone());
     settings.imported_sounds.sort();
     settings.imported_sounds.dedup();
 
-    save_settings(settings.clone())?; // Übergib den Wert und nicht die Referenz
+    save_settings(settings.clone())?;
 
     log(
         LogLevel::Info,
@@ -62,5 +62,5 @@ pub async fn import_folder(folder_path: String) -> Result<(), String> {
         ),
     );
 
-    Ok(())
+    Ok(scanned_files)
 }
