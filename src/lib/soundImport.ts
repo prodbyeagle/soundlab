@@ -4,8 +4,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 
 export const loadImportedPaths = async (): Promise<string[]> => {
 	try {
-		const paths = (await invoke('get_imported_sounds')) as string[];
-		console.log(paths);
+		const paths = (await invoke('get_imported_path')) as string[];
 		return paths;
 	} catch (error) {
 		console.error('Fehler beim Laden der importierten Pfade:', error);
@@ -21,11 +20,12 @@ export const importFolder = async (
 
 	if (!selected) return;
 
-	console.log('Selected folder path:', selected); // <-- Debugging step
+	console.log('Selected folder path:', selected);
 
 	try {
+		// Use camelCase key 'folderPath' to match Tauri's expectation
 		const files: string[] = await invoke('import_folder', {
-			folder_path: selected, // This matches the backend's expected key
+			folderPath: selected,
 		});
 
 		for (const file of files) {
@@ -45,16 +45,15 @@ export const importFolder = async (
 	}
 };
 
-
 export const removeImportedPath = async (
 	path: string,
 	setImportedPaths: React.Dispatch<React.SetStateAction<string[]>>
 ) => {
 	try {
-		await invoke('remove_imported_sound', { path });
+		await invoke('remove_imported_path', { folder_path: path });
 		setImportedPaths((prev) => prev.filter((p) => p !== path));
-		console.log(`[CACHE] Pfad entfernt: ${path}`);
+		console.log(`[CACHE] Ordner entfernt: ${path}`);
 	} catch (error) {
-		console.error('Fehler beim Entfernen des Pfads:', error);
+		console.error('Fehler beim Entfernen des Ordners:', error);
 	}
 };
