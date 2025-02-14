@@ -32,7 +32,7 @@ const Titlebar = () => {
 	return (
 		<div
 			data-tauri-drag-region
-			className='fixed top-0 left-0 z-50 flex h-8 w-full items-center border-b border-neutral-900 bg-neutral-950 px-3'
+			className='absolute top-0 left-0 z-50 flex h-8 w-full items-center border-b border-neutral-900 bg-neutral-950 px-3'
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}>
 			<div className='flex items-center gap-2 py-1.5'>

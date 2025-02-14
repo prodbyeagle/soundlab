@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import SearchBar from './SearchBar';
-import { Slider } from '../ui/Slider/Slider';
 import { Select } from '../ui/Select/Select';
 import { Button } from '../ui/Button/Button';
 
@@ -14,47 +13,53 @@ const categories = [
 	{ id: 'perc', label: 'Percussion' },
 ];
 
-// will be changed to real data
 const sortOptions = [
 	{ value: 'date', label: 'Newest' },
 	{ value: 'popularity', label: 'Most Popular' },
 	{ value: 'length', label: 'Length' },
 ];
 
-const Sidebar = () => {
-	const [duration, setDuration] = useState(1000);
+interface SidebarProps {
+	className?: string;
+}
+
+const Sidebar = ({ className = '' }: SidebarProps) => {
 	const [sortBy, setSortBy] = useState(sortOptions[0].value);
+	const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
+		new Set()
+	);
+
+	const toggleCategory = (id: string) => {
+		setSelectedCategories((prev) => {
+			const newSet = new Set(prev);
+			newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+			return newSet;
+		});
+	};
 
 	return (
-		<aside className='h-fit w-72 rounded-xl border border-neutral-900 bg-neutral-950 p-4'>
+		<aside
+			className={`border-border w-2xs rounded-xl border bg-neutral-950 p-4 ${className}`}>
 			<h2 className='mb-4 text-xl font-medium'>Filters</h2>
+
 			<SearchBar />
 
 			<div className='mt-6'>
 				<h3 className='mb-3 text-sm font-medium'>Categories</h3>
-				<div className='flex flex-wrap gap-2'>
+				<div className='grid grid-cols-2 gap-2 sm:flex sm:flex-wrap'>
 					{categories.map((category) => (
 						<button
 							key={category.id}
-							className='rounded border border-neutral-900 px-3 py-1 text-sm transition-all duration-300 hover:cursor-pointer hover:bg-neutral-800'>
+							onClick={() => toggleCategory(category.id)}
+							className={`w-full rounded border px-3 py-1 text-sm transition-colors duration-300 sm:w-auto ${
+								selectedCategories.has(category.id)
+									? 'border-neutral-600 bg-neutral-800'
+									: 'border-neutral-800 hover:bg-neutral-900'
+							}`}>
 							{category.label}
 						</button>
 					))}
 				</div>
-			</div>
-
-			<div className='mt-6'>
-				<Slider
-					variant='non-uniform'
-					min={0}
-					max={2000}
-					value={duration}
-					step={100}
-					onChange={setDuration}
-					className='mb-2'
-					label='Duration'
-				/>
-				<div className='text-xs text-neutral-300'>{duration}ms</div>
 			</div>
 
 			<div className='mt-6'>
@@ -71,8 +76,8 @@ const Sidebar = () => {
 					variant='danger'
 					className='w-full'
 					onClick={() => {
-						setDuration(1000);
 						setSortBy(sortOptions[0].value);
+						setSelectedCategories(new Set());
 					}}>
 					Reset Filters
 				</Button>

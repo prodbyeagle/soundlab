@@ -155,7 +155,7 @@ export const Slider: React.FC<SliderProps> = ({
 				))}
 
 				<div
-					className={`absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border-2 border-neutral-900 bg-white shadow-sm transition-transform hover:scale-110 dark:border-neutral-200 dark:bg-neutral-900 ${
+					className={`border-border absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border-2 bg-white shadow-sm transition-transform hover:scale-110 dark:border-neutral-200 dark:bg-neutral-900 ${
 						isDragging ? 'scale-110 active:scale-120' : ''
 					}`}
 					style={{ left: `${valueToPercent(value, min, max)}%` }}

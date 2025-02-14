@@ -6,7 +6,7 @@ import { Spinner } from '../Spinner/Spinner';
 export const Button: React.FC<ButtonProps> = ({
 	content,
 	children,
-	variant = 'neutral',
+	variant = 'border',
 	size = 'md',
 	loading = false,
 	icon: Icon,

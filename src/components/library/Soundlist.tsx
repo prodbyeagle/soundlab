@@ -37,14 +37,13 @@ const SoundList = () => {
 	};
 
 	return (
-		<div className='space-y-4'>
+		<div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
 			<audio ref={audioRef} onEnded={() => setPlaying(null)} />
 			{demoSounds.map((sound, index) => (
 				<SoundCard
 					key={index}
 					index={index}
 					name={sound.name}
-					// type={sound.type}
 					url={sound.url}
 					isPlaying={playing === index}
 					onPlay={togglePlay}
