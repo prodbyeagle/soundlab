@@ -1,26 +1,39 @@
+use std::sync::Arc;
+use tauri::Builder;
+
+mod api;
 mod cache;
+mod db;
 mod import;
-mod logger;
 mod settings;
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_opener::init())
+use api::handlers::{delete_sound, get_imported_paths, get_sounds, import_directory, import_sound, Api}; // Imports der Handler
+use cache::cache::Cache;
+use db::connection::DatabasePool;
+use db::sound::SoundRepository;
+use import::importer::Importer;
+
+#[tokio::main]
+pub async fn run() {
+    let db_pool = Arc::new(
+        DatabasePool::new("mongodb://localhost:27017", "soundlab")
+            .await
+            .unwrap(),
+    );
+    let sound_repo = Arc::new(SoundRepository::new(db_pool.get_db()));
+    let cache = Arc::new(Cache::new(100));
+    let importer = Arc::new(Importer::new(sound_repo.clone(), cache.clone()));
+    let api = Arc::new(Api::new(sound_repo.clone(), importer.clone(), cache.clone()));
+
+    Builder::default()
+        .manage(api)  // Hier wird `api` als State an die App übergeben
         .invoke_handler(tauri::generate_handler![
-            import::import_folder,
-            settings::get_imported_sounds,
-            settings::get_imported_path,
-            settings::add_imported_sound,
-            settings::remove_imported_path,
-            settings::load_settings,
-            settings::save_settings,
-            cache::init_cache,
-            cache::add_to_cache,
-            cache::remove_from_cache,
-            cache::get_cached_sounds,
+            import_sound,
+            import_directory,
+            get_sounds,
+            delete_sound,
+            get_imported_paths
         ])
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("Fehler beim Starten der Tauri-App");
 }

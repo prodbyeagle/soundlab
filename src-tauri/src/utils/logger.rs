@@ -9,7 +9,7 @@ pub enum LogLevel {
     Info,
     Warn,
     Error,
-    // Debug,
+    Debug,
 }
 
 static LOGGER: Lazy<Mutex<Logger>> = Lazy::new(|| Mutex::new(Logger::new()));
@@ -53,7 +53,7 @@ impl Logger {
             LogLevel::Info => "INFO",
             LogLevel::Warn => "WARN",
             LogLevel::Error => "ERROR",
-            // LogLevel::Debug => "DEBUG",
+            LogLevel::Debug => "DEBUG",
         }
     }
 }
