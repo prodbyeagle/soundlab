@@ -39,3 +39,9 @@
 .dialog-exit {
 	animation: dialog-out 0.9s ease-in-out;
 }
+
+/* hide scrollbar */
+::-webkit-scrollbar {
+  width: -0px;
+  height: -0px;
+}

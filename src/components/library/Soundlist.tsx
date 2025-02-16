@@ -1,32 +1,30 @@
-import { useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import SoundCard from './SoundCard';
-
-const demoSounds = [
-	{ name: 'Kick 808', type: '808', url: '/sounds/kick808.mp3' },
-	{ name: 'Snare Classic', type: 'Snare', url: '/sounds/snare-classic.mp3' },
-	{ name: 'HiHat Open', type: 'HiHat', url: '/sounds/hihat-open.mp3' },
-];
+import { getImportedSounds } from '../../lib/soundImport';
 
 const SoundList = () => {
-	const [playing, setPlaying] = useState<number | null>(null);
+	const [sounds, setSounds] = useState<
+		{ name: string; type: string; url: string }[]
+	>([]);
 	const [favorites, setFavorites] = useState<number[]>([]);
-	const audioRef = useRef<HTMLAudioElement | null>(null);
+	const [error, setError] = useState<string | null>(null);
 
-	const togglePlay = (index: number, url: string) => {
-		if (playing === index) {
-			audioRef.current?.pause();
-			setPlaying(null);
-		} else {
-			if (audioRef.current) {
-				audioRef.current.src = url;
-				audioRef.current.play();
-			} else {
-				audioRef.current = new Audio(url);
-				audioRef.current.play();
+	useEffect(() => {
+		const fetchSounds = async () => {
+			try {
+				const importedSounds = await getImportedSounds();
+				setSounds(importedSounds);
+			} catch (err) {
+				console.error(
+					'Fehler beim Abrufen der importierten Sounds:',
+					err
+				);
+				setError('Failed to load sounds.');
 			}
-			setPlaying(index);
-		}
-	};
+		};
+
+		fetchSounds();
+	}, []);
 
 	const toggleFavorite = (index: number) => {
 		setFavorites((prev) =>
@@ -38,19 +36,26 @@ const SoundList = () => {
 
 	return (
 		<div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
-			<audio ref={audioRef} onEnded={() => setPlaying(null)} />
-			{demoSounds.map((sound, index) => (
-				<SoundCard
-					key={index}
-					index={index}
-					name={sound.name}
-					url={sound.url}
-					isPlaying={playing === index}
-					onPlay={togglePlay}
-					isFavorite={favorites.includes(index)}
-					onToggleFavorite={toggleFavorite}
-				/>
-			))}
+			{error ? (
+				<p className='text-center text-red-500'>{error}</p>
+			) : sounds.length === 0 ? (
+				<p className='text-center text-neutral-500'>
+					No sounds imported yet.
+				</p>
+			) : (
+				sounds.map((sound, index) => (
+					<SoundCard
+						key={index}
+						index={index}
+						name={sound.name}
+						url={sound.url}
+						isPlaying={false}
+						onPlay={() => console.log('123')}
+						isFavorite={favorites.includes(index)}
+						onToggleFavorite={toggleFavorite}
+					/>
+				))
+			)}
 		</div>
 	);
 };

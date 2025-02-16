@@ -62,7 +62,7 @@ export const Dialog: React.FC<DialogProps> = ({
 					isOpen ? 'dialog-enter' : 'dialog-exit',
 					'rounded-2xl p-4',
 					shadowClass,
-					'relative mx-5 max-h-200 max-w-4xl min-w-md overflow-y-scroll border border-neutral-300 bg-neutral-100 transition-all duration-300 dark:border-neutral-800 dark:bg-neutral-950',
+					'relative max-h-200 max-w-4xl min-w-md border border-neutral-300 bg-neutral-100 transition-all duration-300 dark:border-neutral-800 dark:bg-neutral-950',
 					className
 				)}>
 				<button

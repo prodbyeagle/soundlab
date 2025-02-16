@@ -1,65 +1,93 @@
-import { useContext, useEffect, useState } from 'react';
-import SoundContext from '../context/SoundContext';
+import { useEffect, useState } from 'react';
+// import SoundContext from '../context/SoundContext';
 import { Button } from './ui/Button/Button';
-import { Plus, Trash } from 'lucide-react';
-import {
-	loadImportedPaths,
-	importFolder,
-	removeImportedPath,
-} from '../lib/soundImport';
+import { Trash } from 'lucide-react';
+import { getImportedPaths, deleteSound } from '../lib/soundImport';
 
 const FileImporter = () => {
-	const { addSound } = useContext(SoundContext)!;
+	// const { addSound } = useContext(SoundContext)!;
 	const [importedPaths, setImportedPaths] = useState<string[]>([]);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		const loadPaths = async () => {
-			const paths = await loadImportedPaths();
-			setImportedPaths(paths);
+			try {
+				const paths = await getImportedPaths();
+				setImportedPaths(paths);
+			} catch (err) {
+				console.error('Fehler beim Laden der importierten Pfade:', err);
+				setError('Failed to load imported paths.');
+			}
 		};
 
 		loadPaths();
 	}, []);
 
+	// const handleImport = async () => {
+	// 	try {
+	// 		await importDirectory();
+	// 		const paths = await getImportedPaths();
+	// 		setImportedPaths(paths);
+	// 	} catch (err) {
+	// 		console.error('Fehler beim Importieren des Ordners:', err);
+	// 		setError('Failed to import folder.');
+	// 	}
+	// };
+
+	const handleRemove = async (path: string) => {
+		try {
+			await deleteSound(path);
+			const paths = await getImportedPaths();
+			setImportedPaths(paths);
+		} catch (err) {
+			console.error('Fehler beim Entfernen des Ordners:', err);
+			setError('Failed to remove folder.');
+		}
+	};
+
 	return (
 		<div className='flex flex-col space-y-4'>
-			<p className='text-sm text-neutral-400 text-center'>
+			<h2 className='text-lg font-medium text-neutral-100'>
+				Import Sounds
+			</h2>
+			<p className='text-sm text-neutral-400'>
 				Import MP3 or WAV files to your sound library
 			</p>
-			<div className='flex gap-2'>
-				<Button
-					className='w-full'
-					content='Import'
-					variant='border'
-					icon={Plus}
-					onClick={() => importFolder(addSound, setImportedPaths)}
-				/>
-			</div>
-			<div className='mt-4'>
-				<h3 className='mb-2 text-base text-neutral-100'>
-					Already Imported Paths:
+			{error && <p className='text-sm text-red-500'>{error}</p>}
+			{/* <Button
+				className='w-full py-2'
+				content='Import Folder'
+				variant='border'
+				icon={Plus}
+				onClick={handleImport}
+			/> */}
+			<div>
+				<h3 className='mb-2 text-sm font-medium text-neutral-300'>
+					Imported Files
 				</h3>
-				<ul className='space-y-2 text-xs text-neutral-400'>
+				<div className='max-h-135 space-y-2 overflow-y-scroll'>
 					{importedPaths.length === 0 ? (
-						<li>No paths imported yet.</li>
+						<p className='text-center text-sm text-neutral-500'>
+							No files imported yet.
+						</p>
 					) : (
 						importedPaths.map((path, index) => (
-							<li key={index} className='flex justify-between'>
-								<span>{path}</span>
+							<div
+								key={index}
+								className='flex items-center justify-between rounded-xl bg-neutral-900/40 px-3 py-2'>
+								<span
+									className='truncate pr-8 text-xs text-neutral-300'
+									title={path}>
+									{path}
+								</span>
 								<Button
-									content='Delete'
 									icon={Trash}
-									onClick={() =>
-										removeImportedPath(
-											path,
-											setImportedPaths
-										)
-									}
+									onClick={() => handleRemove(path)}
 								/>
-							</li>
+							</div>
 						))
 					)}
-				</ul>
+				</div>
 			</div>
 		</div>
 	);

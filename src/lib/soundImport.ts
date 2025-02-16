@@ -1,59 +1,69 @@
-// lib/soundImport.ts
 import { invoke } from '@tauri-apps/api/core';
-import { open } from '@tauri-apps/plugin-dialog';
 
-export const loadImportedPaths = async (): Promise<string[]> => {
+/**
+ * Importiert einen einzelnen Sound.
+ * @param name - Name des Sounds
+ * @param path - Dateipfad des Sounds
+ */
+export async function importSound(name: string, path: string): Promise<void> {
 	try {
-		const paths = (await invoke('get_imported_path')) as string[];
+		await invoke('import_sound', { name, path });
+	} catch (error) {
+		console.error('Error importing sound:', error);
+		throw error;
+	}
+}
+
+/**
+ * Importiert alle Sounds aus einem Verzeichnis.
+ * @param dirPath - Pfad zum Verzeichnis
+ */
+export async function importDirectory(dirPath: string): Promise<void> {
+	try {
+		await invoke('import_directory', { dir_path: dirPath });
+	} catch (error) {
+		console.error('Error importing directory:', error);
+		throw error;
+	}
+}
+
+/**
+ * Ruft alle gespeicherten Sounds (Namen) ab.
+ * @returns Array von Soundnamen
+ */
+export async function getSounds(): Promise<string[]> {
+	try {
+		const sounds = (await invoke('get_sounds')) as string[];
+		return sounds;
+	} catch (error) {
+		console.error('Error fetching sounds:', error);
+		throw error;
+	}
+}
+
+/**
+ * Löscht einen Sound anhand seiner ID.
+ * @param id - ID des Sounds
+ */
+export async function deleteSound(id: string): Promise<void> {
+	try {
+		await invoke('delete_sound', { id });
+	} catch (error) {
+		console.error('Error deleting sound:', error);
+		throw error;
+	}
+}
+
+/**
+ * Ruft alle importierten Pfade ab.
+ * @returns Array von Pfaden
+ */
+export async function getImportedPaths(): Promise<string[]> {
+	try {
+		const paths = (await invoke('get_imported_paths')) as string[];
 		return paths;
 	} catch (error) {
-		console.error('Fehler beim Laden der importierten Pfade:', error);
-		return [];
+		console.error('Error fetching imported paths:', error);
+		throw error;
 	}
-};
-
-export const importFolder = async (
-	addSound: (sound: { name: string; path: string }) => void,
-	setImportedPaths: React.Dispatch<React.SetStateAction<string[]>>
-) => {
-	const selected = await open({ directory: true });
-
-	if (!selected) return;
-
-	console.log('Selected folder path:', selected);
-
-	try {
-		// Use camelCase key 'folderPath' to match Tauri's expectation
-		const files: string[] = await invoke('import_folder', {
-			folderPath: selected,
-		});
-
-		for (const file of files) {
-			const cached = await invoke('import_file', { path: file });
-			if (cached) {
-				addSound({ name: file.split('/').pop()!, path: file });
-			} else {
-				console.log(`[CACHE] Datei bereits im Cache: ${file}`);
-			}
-		}
-
-		await invoke('add_imported_sound', { path: selected });
-
-		setImportedPaths((prev) => [...prev, selected]);
-	} catch (error) {
-		console.error('Fehler beim Import des Ordners:', error);
-	}
-};
-
-export const removeImportedPath = async (
-	path: string,
-	setImportedPaths: React.Dispatch<React.SetStateAction<string[]>>
-) => {
-	try {
-		await invoke('remove_imported_path', { folder_path: path });
-		setImportedPaths((prev) => prev.filter((p) => p !== path));
-		console.log(`[CACHE] Ordner entfernt: ${path}`);
-	} catch (error) {
-		console.error('Fehler beim Entfernen des Ordners:', error);
-	}
-};
+}
