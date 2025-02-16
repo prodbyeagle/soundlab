@@ -39,7 +39,7 @@ const Sidebar = ({ className = '' }: SidebarProps) => {
 
 	return (
 		<aside
-			className={`border-neutral-800 lg:w-2xs rounded-xl border bg-neutral-950 p-4 ${className}`}>
+			className={`rounded-xl border border-neutral-800 bg-neutral-950 p-4 lg:w-2xs ${className}`}>
 			<h2 className='mb-4 text-xl font-medium'>Filters</h2>
 
 			<SearchBar />

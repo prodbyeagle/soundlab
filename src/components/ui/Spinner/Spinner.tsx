@@ -33,8 +33,7 @@ export const Spinner: FC<SpinnerProps> = ({
 			xmlns='http://www.w3.org/2000/svg'
 			style={{
 				animation: `spin ${speed}s cubic-bezier(0.4, 0.0, 0.2, 1) infinite`,
-			}}
-		>
+			}}>
 			<circle
 				cx={size / 2}
 				cy={size / 2}

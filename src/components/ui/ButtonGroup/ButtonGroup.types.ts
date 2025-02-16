@@ -1,4 +1,4 @@
-import { LucideIcon } from "lucide-react";
+import { LucideIcon } from 'lucide-react';
 
 /**
  * Props for the ButtonGroup component.
@@ -30,7 +30,6 @@ export interface ButtonGroupProps {
 	 */
 	className?: string;
 }
-
 
 interface Button {
 	label: string;

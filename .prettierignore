@@ -1,0 +1,10 @@
+/.env
+/.git
+/.gitignore
+/.vscode
+/node_modules
+/pnpm-lock.yaml
+/src-tauri/target
+/src-tauri/.gitignore
+/src-tauri/Cargo.toml
+/src-tauri/Cargo.lock
