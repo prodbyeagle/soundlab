@@ -1,9 +1,7 @@
-use mongodb::bson::oid::ObjectId;
 use std::sync::Arc;
 use tauri::State;
 
-use crate::cache::cache::Cache;
-use crate::db::sound::SoundRepository;
+use crate::db::sound::{Sound, SoundRepository};
 use crate::import::importer::Importer;
 use crate::settings::manager::{add_import_path, get_import_paths};
 
@@ -11,18 +9,15 @@ use crate::settings::manager::{add_import_path, get_import_paths};
 pub struct Api {
     pub repo: Arc<SoundRepository>,
     pub importer: Arc<Importer>,
-    pub cache: Arc<Cache>,
+    // pub cache: Arc<Cache>,
 }
 
 impl Api {
-    pub fn new(repo: Arc<SoundRepository>, importer: Arc<Importer>, cache: Arc<Cache>) -> Self {
-        Self {
-            repo,
-            importer,
-            cache,
-        }
+    pub fn new(repo: Arc<SoundRepository>, importer: Arc<Importer>) -> Self {
+        Self { repo, importer }
     }
 
+    /// Imports a single sound.
     pub async fn import_sound_method(&self, name: String, path: String) -> Result<(), String> {
         self.importer
             .import_sound(&name, &path)
@@ -32,6 +27,7 @@ impl Api {
         Ok(())
     }
 
+    /// Imports all sounds from a directory.
     pub async fn import_directory_method(&self, dir_path: String) -> Result<(), String> {
         self.importer
             .import_directory(&dir_path)
@@ -41,23 +37,33 @@ impl Api {
         Ok(())
     }
 
-    pub async fn get_sounds_method(&self) -> Result<Vec<String>, String> {
-        let sounds = self.repo.get_all().await.map_err(|e| format!("Error fetching sounds: {}", e))?;
-        Ok(sounds.into_iter().map(|s| s.name).collect())
+    /// Returns all sounds from the database.
+    pub async fn get_sounds_method(&self) -> Result<Vec<Sound>, String> {
+        let sounds = self
+            .repo
+            .get_all()
+            .await
+            .map_err(|e| format!("Error fetching sounds: {}", e))?;
+        Ok(sounds)
     }
 
+    /// Deletes a sound by its ID. The ID is provided as a String which is parsed into an i64.
     pub async fn delete_sound_method(&self, id: String) -> Result<(), String> {
-        let obj_id = ObjectId::parse_str(&id).map_err(|e| format!("Invalid ObjectId: {}", e))?;
-        self.repo.delete(obj_id).await.map_err(|e| format!("Error deleting sound: {}", e))?;
+        let parsed_id: i64 = id.parse().map_err(|e| format!("Invalid id: {}", e))?;
+        self.repo
+            .delete(parsed_id)
+            .await
+            .map_err(|e| format!("Error deleting sound: {}", e))?;
         Ok(())
     }
 
+    /// Returns the list of imported paths.
     pub async fn get_imported_paths_method(&self) -> Result<Vec<String>, String> {
         Ok(get_import_paths())
     }
 }
 
-// --- Freie Wrapper-Funktionen für Tauri Commands ---
+// --- Tauri Command Wrappers ---
 
 #[tauri::command]
 pub async fn import_sound(api: State<'_, Api>, name: String, path: String) -> Result<(), String> {
@@ -70,7 +76,7 @@ pub async fn import_directory(api: State<'_, Api>, dir_path: String) -> Result<(
 }
 
 #[tauri::command]
-pub async fn get_sounds(api: State<'_, Api>) -> Result<Vec<String>, String> {
+pub async fn get_sounds(api: State<'_, Api>) -> Result<Vec<Sound>, String> {
     api.get_sounds_method().await
 }
 

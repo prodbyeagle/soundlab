@@ -1,9 +1,12 @@
+use dirs::config_dir;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::sync::Mutex;
 
-const CONFIG_PATH: &str = "config.json";
+lazy_static! {
+    static ref SETTINGS: Mutex<Config> = Mutex::new(Config::load());
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
@@ -18,23 +21,29 @@ impl Config {
     }
 
     fn load() -> Self {
-        match fs::read_to_string(CONFIG_PATH) {
+        let config_dir = config_dir().expect("Failed to get config directory");
+        let config_path = config_dir.join("soundlab").join("config.json");
+
+        match fs::read_to_string(config_path) {
             Ok(content) => serde_json::from_str(&content).unwrap_or_else(|_| Self::new()),
             Err(_) => Self::new(),
         }
     }
 
     fn save(&self) {
+        let config_dir = config_dir().expect("Failed to get config directory");
+        let config_path = config_dir.join("soundlab").join("config.json");
+
+        if !config_path.parent().unwrap().exists() {
+            fs::create_dir_all(config_path.parent().unwrap())
+                .expect("Failed to create config directory");
+        }
+
         let content = serde_json::to_string_pretty(self).unwrap();
-        fs::write(CONFIG_PATH, content).unwrap();
+        fs::write(config_path, content).unwrap();
     }
 }
 
-lazy_static! {
-    static ref SETTINGS: Mutex<Config> = Mutex::new(Config::load());
-}
-
-/// Fügt einen neuen Import-Pfad hinzu und speichert ihn
 pub fn add_import_path(path: String) {
     let mut settings = SETTINGS.lock().unwrap();
     if !settings.imported_paths.contains(&path) {
@@ -43,7 +52,6 @@ pub fn add_import_path(path: String) {
     }
 }
 
-/// Gibt alle gespeicherten Import-Pfade zurück
 pub fn get_import_paths() -> Vec<String> {
     SETTINGS.lock().unwrap().imported_paths.clone()
 }

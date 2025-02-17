@@ -7,7 +7,7 @@ use once_cell::sync::Lazy;
 #[derive(Debug)]
 pub enum LogLevel {
     Info,
-    Warn,
+    // Warn,
     Error,
     Debug,
 }
@@ -51,7 +51,7 @@ impl Logger {
     fn level_to_str(level: &LogLevel) -> &'static str {
         match level {
             LogLevel::Info => "INFO",
-            LogLevel::Warn => "WARN",
+            // LogLevel::Warn => "WARN",
             LogLevel::Error => "ERROR",
             LogLevel::Debug => "DEBUG",
         }

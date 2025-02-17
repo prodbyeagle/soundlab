@@ -1,43 +1,50 @@
-use futures::stream::TryStreamExt;
-use mongodb::bson::{doc, oid::ObjectId, DateTime};
-use mongodb::Collection;
 use serde::{Deserialize, Serialize};
+use sqlx::{Error, FromRow, SqlitePool};
 use std::sync::Arc;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, FromRow)]
 pub struct Sound {
-    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
-    pub id: Option<ObjectId>,
+    // Using an integer for the primary key. When inserting, this can be None.
+    pub id: Option<i64>,
     pub name: String,
     pub path: String,
-    pub created_at: DateTime,
 }
 
 pub struct SoundRepository {
-    collection: Arc<Collection<Sound>>,
+    pool: Arc<SqlitePool>,
 }
 
 impl SoundRepository {
-    pub fn new(db: Arc<mongodb::Database>) -> Self {
-        let collection = db.collection::<Sound>("sounds");
-        Self {
-            collection: Arc::new(collection),
-        }
+    /// Creates a new repository from an Arc-wrapped SqlitePool.
+    pub fn new(pool: Arc<SqlitePool>) -> Self {
+        Self { pool }
     }
 
-    pub async fn insert(&self, sound: Sound) -> mongodb::error::Result<ObjectId> {
-        let result = self.collection.insert_one(sound).await?;
-        Ok(result.inserted_id.as_object_id().unwrap())
+    /// Inserts a new sound into the database.
+    /// Returns the auto-generated ID of the inserted sound.
+    pub async fn insert(&self, sound: Sound) -> Result<i64, Error> {
+        let result = sqlx::query("INSERT INTO sounds (name, path) VALUES (?, ?)")
+            .bind(&sound.name)
+            .bind(&sound.path)
+            .execute(&*self.pool)
+            .await?;
+        Ok(result.last_insert_rowid())
     }
 
-    pub async fn get_all(&self) -> mongodb::error::Result<Vec<Sound>> {
-        let cursor = self.collection.find(doc! {}).await?;
-        let results: Vec<Sound> = cursor.try_collect().await?;
-        Ok(results)
+    /// Retrieves all sounds from the database.
+    pub async fn get_all(&self) -> Result<Vec<Sound>, Error> {
+        let sounds = sqlx::query_as::<_, Sound>("SELECT id, name, path FROM sounds")
+            .fetch_all(&*self.pool)
+            .await?;
+        Ok(sounds)
     }
 
-    pub async fn delete(&self, id: ObjectId) -> mongodb::error::Result<()> {
-        self.collection.delete_one(doc! { "_id": id }).await?;
+    /// Deletes a sound by its ID.
+    pub async fn delete(&self, id: i64) -> Result<(), Error> {
+        sqlx::query("DELETE FROM sounds WHERE id = ?")
+            .bind(id)
+            .execute(&*self.pool)
+            .await?;
         Ok(())
     }
 }
