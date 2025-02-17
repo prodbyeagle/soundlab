@@ -17,7 +17,6 @@ impl Api {
         Self { repo, importer }
     }
 
-    /// Imports a single sound.
     pub async fn import_sound_method(&self, name: String, path: String) -> Result<(), String> {
         self.importer
             .import_sound(&name, &path)
@@ -27,7 +26,6 @@ impl Api {
         Ok(())
     }
 
-    /// Imports all sounds from a directory.
     pub async fn import_directory_method(&self, dir_path: String) -> Result<(), String> {
         self.importer
             .import_directory(&dir_path)
@@ -37,7 +35,6 @@ impl Api {
         Ok(())
     }
 
-    /// Returns all sounds from the database.
     pub async fn get_sounds_method(&self) -> Result<Vec<Sound>, String> {
         let sounds = self
             .repo
@@ -47,7 +44,6 @@ impl Api {
         Ok(sounds)
     }
 
-    /// Deletes a sound by its ID. The ID is provided as a String which is parsed into an i64.
     pub async fn delete_sound_method(&self, id: String) -> Result<(), String> {
         let parsed_id: i64 = id.parse().map_err(|e| format!("Invalid id: {}", e))?;
         self.repo
@@ -57,13 +53,10 @@ impl Api {
         Ok(())
     }
 
-    /// Returns the list of imported paths.
     pub async fn get_imported_paths_method(&self) -> Result<Vec<String>, String> {
         Ok(get_import_paths())
     }
 }
-
-// --- Tauri Command Wrappers ---
 
 #[tauri::command]
 pub async fn import_sound(api: State<'_, Api>, name: String, path: String) -> Result<(), String> {

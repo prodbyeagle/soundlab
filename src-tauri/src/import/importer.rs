@@ -6,75 +6,93 @@ use tokio::fs;
 use crate::cache::cache::Cache;
 use crate::db::sound::{Sound, SoundRepository};
 
+/// A struct for importing sound files, interacting with both the sound repository and the cache.
 pub struct Importer {
     repo: Arc<SoundRepository>,
     cache: Arc<Cache>,
 }
 
 impl Importer {
+    /// Creates a new `Importer` instance with a given `SoundRepository` and `Cache`.
+    ///
+    /// # Arguments
+    ///
+    /// * `repo` - The `SoundRepository` for inserting sound records into the database.
+    /// * `cache` - The `Cache` for storing sound data in-memory.
+    ///
+    /// # Returns
+    ///
+    /// A new `Importer` wrapped in an `Arc`.
     pub fn new(repo: Arc<SoundRepository>, cache: Arc<Cache>) -> Arc<Self> {
         Arc::new(Self { repo, cache })
     }
 
-    /// Imports a single sound file.
+    /// Imports a single sound file by checking if it exists and is not already cached.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the sound file.
+    /// * `path` - The path to the sound file on disk.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` indicating success or an error message if any issues arise.
     pub async fn import_sound(self: &Arc<Self>, name: &str, path: &str) -> Result<(), String> {
-        // Check if the sound is already cached.
         if self.cache.get_cached_sound(name).await.is_some() {
-            println!("Sound '{}' bereits im Cache, Import übersprungen.", name);
+            println!("Sound '{}' already cached, skipping import.", name);
             return Ok(());
         }
 
-        // Check if the file exists on disk.
         if !Path::new(path).exists() {
-            eprintln!("Fehler: Datei '{}' nicht gefunden.", path);
+            eprintln!("Error: File '{}' not found.", path);
             return Ok(());
         }
 
-        // Create a new Sound entry.
         let sound = Sound {
             id: None,
             name: name.to_string(),
             path: path.to_string(),
         };
 
-        // Try inserting the sound using the SQLx repository.
         match self.repo.insert(sound).await {
             Ok(sound_id) => {
-                // Cache the sound if insertion was successful.
                 self.cache
                     .cache_sound(name.to_string(), path.to_string())
                     .await;
-                println!(
-                    "Sound '{}' erfolgreich importiert (ID: {}).",
-                    name, sound_id
-                );
+                println!("Sound '{}' imported successfully (ID: {}).", name, sound_id);
             }
             Err(e) => {
-                eprintln!("Fehler beim Import von '{}': {}", name, e);
-                // You may choose to propagate the error here if desired.
+                eprintln!("Error importing '{}': {}", name, e);
             }
         }
 
         Ok(())
     }
 
-    /// Imports all sound files (mp3 or wav) from a given directory.
+    /// Imports all sound files (MP3 or WAV) from a specified directory.
+    ///
+    /// # Arguments
+    ///
+    /// * `dir_path` - The path to the directory containing sound files to import.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` indicating success or failure of the operation.
     pub async fn import_directory(self: &Arc<Self>, dir_path: &str) -> Result<(), String> {
         let mut entries = fs::read_dir(dir_path)
             .await
-            .map_err(|e| format!("Fehler beim Lesen des Ordners '{}': {}", dir_path, e))?;
+            .map_err(|e| format!("Error reading directory '{}': {}", dir_path, e))?;
 
         let mut tasks = vec![];
 
         while let Some(entry) = entries
             .next_entry()
             .await
-            .map_err(|e| format!("Fehler beim Iterieren im Ordner '{}': {}", dir_path, e))?
+            .map_err(|e| format!("Error iterating through directory '{}': {}", dir_path, e))?
         {
             let path = entry.path();
             if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
                 if ext.eq_ignore_ascii_case("mp3") || ext.eq_ignore_ascii_case("wav") {
-                    // Use the file stem as the sound name.
                     let name = path
                         .file_stem()
                         .and_then(|s| s.to_str())
@@ -85,17 +103,16 @@ impl Importer {
                     let importer = Arc::clone(self);
                     tasks.push(tokio::spawn(async move {
                         if let Err(e) = importer.import_sound(&name, &path_str).await {
-                            eprintln!("Fehler beim Importieren von '{}': {}", name, e);
+                            eprintln!("Error importing '{}': {}", name, e);
                         }
                     }));
                 }
             }
         }
 
-        // Wait for all import tasks to complete.
         join_all(tasks).await;
 
-        println!("Import abgeschlossen für Ordner: {}", dir_path);
+        println!("Import complete for directory: {}", dir_path);
         Ok(())
     }
 }

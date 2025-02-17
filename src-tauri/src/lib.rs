@@ -19,6 +19,11 @@ use db::connection::DatabasePool;
 use db::sound::SoundRepository;
 use import::importer::Importer;
 
+/// Main entry point for the Tauri application.
+///
+/// This function is the asynchronous entry point for running the Tauri app. It initializes
+/// the application, sets up necessary configurations, and starts the Tauri window. It also
+/// sets up database connection and ensures necessary directories and tables exist.
 #[tokio::main]
 pub async fn run() {
     let app_data_path = config_dir().expect("Failed to get AppData directory");
