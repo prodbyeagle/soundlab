@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schema.tauri.app/config/2",
-	"productName": "soundlab",
+	"productName": "SoundLab",
 	"version": "0.1.0",
 	"identifier": "com.soundlab.app",
 	"build": {
@@ -17,7 +17,7 @@
 				"height": 600,
 				"decorations": false,
 				"minHeight": 800,
-				"minWidth": 450
+				"minWidth": 480
 			}
 		],
 		"security": {
@@ -30,8 +30,9 @@
 	},
 	"bundle": {
 		"active": true,
-		"targets": "all",
+		"targets": "msi",
 		"icon": [
+			"icons/icon.png",
 			"icons/128x128.png",
 			"icons/128x128@2x.png",
 			"icons/icon.icns",
