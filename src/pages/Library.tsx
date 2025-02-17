@@ -1,4 +1,3 @@
-// Library.tsx
 import Layout from '../components/Layout';
 import Sidebar from '../components/library/Sidebar';
 import SoundList from '../components/library/Soundlist';
@@ -13,12 +12,10 @@ const Library = () => {
 	return (
 		<Layout>
 			<div className='relative flex gap-4'>
-				{/* Desktop Sidebar */}
 				<div className='hidden lg:block'>
 					<Sidebar />
 				</div>
 
-				{/* Mobile Filter Dialog */}
 				<Dialog
 					isOpen={isFilterDialogOpen}
 					onClose={() => setIsFilterDialogOpen(false)}>
@@ -31,10 +28,8 @@ const Library = () => {
 					icon={SlidersHorizontal}
 					size='sm'
 					onClick={() => setIsFilterDialogOpen(true)}
-					variant='border'
-					className='fixed right-4 bottom-4 z-50 lg:hidden'></Button>
+					className='fixed right-4 bottom-4 z-50 backdrop-blur-xs lg:hidden'></Button>
 
-				{/* Main Content */}
 				<div className='flex-1 p-4 lg:p-6'>
 					<h1 className='mb-4 text-xl font-medium lg:text-2xl'>
 						Library

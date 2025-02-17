@@ -1,15 +1,24 @@
 import { Window } from '@tauri-apps/api/window';
 import { useState, useEffect } from 'react';
+import { Minus, Square, X, Maximize2 } from 'lucide-react';
 
 const Titlebar = () => {
 	const [isMaximized, setIsMaximized] = useState(false);
-	const [isHovered, setIsHovered] = useState(false);
 
 	useEffect(() => {
 		const updateMaximizedState = async () => {
 			const appWindow = Window.getCurrent();
 			setIsMaximized(await appWindow.isMaximized());
+
+			const unlisten = await appWindow.onResized(() => {
+				appWindow.isMaximized().then(setIsMaximized);
+			});
+
+			return () => {
+				unlisten();
+			};
 		};
+
 		updateMaximizedState();
 	}, []);
 
@@ -21,7 +30,6 @@ const Titlebar = () => {
 	const handleMaximize = async () => {
 		const appWindow = Window.getCurrent();
 		await appWindow.toggleMaximize();
-		setIsMaximized(!isMaximized);
 	};
 
 	const handleClose = async () => {
@@ -32,77 +40,45 @@ const Titlebar = () => {
 	return (
 		<div
 			data-tauri-drag-region
-			className='absolute top-0 left-0 z-50 flex h-8 w-full items-center border-b border-neutral-900 bg-neutral-950 px-3'
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}>
-			<div className='flex items-center gap-2 py-1.5'>
-				<button
-					onClick={handleClose}
-					className='group relative h-3 w-3 rounded-full bg-red-500 transition-opacity hover:bg-red-600'
-					aria-label='Schließen'>
-					{isHovered && (
-						<svg
-							className='absolute top-1/2 left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100'
-							viewBox='0 0 10 10'>
-							<path
-								d='M2,2 L8,8 M8,2 L2,8'
-								stroke='rgba(0,0,0,0.4)'
-								strokeWidth='1.1'
-							/>
-						</svg>
-					)}
-				</button>
+			className='fixed top-0 right-0 left-0 z-50 flex h-8 w-full items-center justify-between border-b border-neutral-900 bg-neutral-950'>
+			<div
+				data-tauri-drag-region
+				className='pointer-events-none flex items-center gap-2 px-3 py-1.5'>
+				<img
+					src='../src-tauri/icons/32x32.png'
+					alt='Logo'
+					className='h-5 w-5'
+				/>
+				<span className='text-xs font-medium text-neutral-300'>
+					SoundLab
+				</span>
+			</div>
+
+			<div className='flex h-full'>
 				<button
 					onClick={handleMinimize}
-					className='group relative h-3 w-3 rounded-full bg-yellow-500 transition-opacity hover:bg-yellow-600'
-					aria-label='Minimieren'>
-					{isHovered && (
-						<svg
-							className='absolute top-1/2 left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100'
-							viewBox='0 0 10 10'>
-							<path
-								d='M2,5 L8,5'
-								stroke='rgba(0,0,0,0.4)'
-								strokeWidth='1.1'
-							/>
-						</svg>
-					)}
+					className='flex h-full w-10 items-center justify-center text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-neutral-200'
+					aria-label='Minimize'>
+					<Minus size={14} />
 				</button>
+
 				<button
 					onClick={handleMaximize}
-					className='group relative h-3 w-3 rounded-full bg-green-500 transition-opacity hover:bg-green-600'
-					aria-label={
-						isMaximized
-							? 'Fenstergröße wiederherstellen'
-							: 'Maximieren'
-					}>
-					{isHovered && (
-						<svg
-							className='absolute top-1/2 left-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100'
-							viewBox='0 0 10 10'>
-							{isMaximized ? (
-								<path
-									d='M2.5,4.5 v3 h3 v-3 h-3 M4.5,2.5 v3 h3 v-3 h-3'
-									stroke='rgba(0,0,0,0.4)'
-									strokeWidth='1.1'
-									fill='none'
-								/>
-							) : (
-								<path
-									d='M2.5,2.5 v5 h5 v-5 h-5'
-									stroke='rgba(0,0,0,0.4)'
-									strokeWidth='1.1'
-									fill='none'
-								/>
-							)}
-						</svg>
+					className='flex h-full w-10 items-center justify-center text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-neutral-200'
+					aria-label={isMaximized ? 'Restore' : 'Maximize'}>
+					{isMaximized ? (
+						<Square size={13} />
+					) : (
+						<Maximize2 size={13} />
 					)}
 				</button>
-			</div>
-			<div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'>
-				<div className='text-sm font-medium text-neutral-300 select-none'>
-					SoundLab [INDEV]
-				</div>
+
+				<button
+					onClick={handleClose}
+					className='flex h-full w-10 items-center justify-center text-neutral-400 transition-colors hover:bg-red-600 hover:text-white'
+					aria-label='Close'>
+					<X size={16} />
+				</button>
 			</div>
 		</div>
 	);

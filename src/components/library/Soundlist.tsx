@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import SoundCard from './SoundCard';
-import { getImportedSounds } from '../../lib/soundImport';
+import { getSounds } from '../../lib/soundImport';
+import type { Sound } from '../../types/Sound';
 
 const SoundList = () => {
-	const [sounds, setSounds] = useState<
-		{ name: string; type: string; url: string }[]
-	>([]);
+	const [sounds, setSounds] = useState<Sound[]>([]);
 	const [favorites, setFavorites] = useState<number[]>([]);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		const fetchSounds = async () => {
 			try {
-				const importedSounds = await getImportedSounds();
+				const importedSounds = await getSounds();
+
 				setSounds(importedSounds);
 			} catch (err) {
 				console.error(
@@ -43,18 +43,20 @@ const SoundList = () => {
 					No sounds imported yet.
 				</p>
 			) : (
-				sounds.map((sound, index) => (
-					<SoundCard
-						key={index}
-						index={index}
-						name={sound.name}
-						url={sound.url}
-						isPlaying={false}
-						onPlay={() => console.log('123')}
-						isFavorite={favorites.includes(index)}
-						onToggleFavorite={toggleFavorite}
-					/>
-				))
+				sounds.map((sound, index) => {
+					return (
+						<SoundCard
+							key={index}
+							index={index}
+							name={sound.name}
+							path={sound.path}
+							isPlaying={false}
+							onPlay={() => console.log('123')}
+							isFavorite={favorites.includes(index)}
+							onToggleFavorite={toggleFavorite}
+						/>
+					);
+				})
 			)}
 		</div>
 	);
