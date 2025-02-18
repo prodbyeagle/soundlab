@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import SoundCard from './SoundCard';
-import { getSounds } from '../../lib/soundImport';
+import { toggleFavorite, getSounds } from '../../lib/soundImport';
 import type { Sound } from '../../types/Sound';
 
 const SoundList = () => {
@@ -27,6 +27,7 @@ const SoundList = () => {
 	}, []);
 
 	const toggleFavorite = (index: number) => {
+		toggleFavorite(index);
 		setFavorites((prev) =>
 			prev.includes(index)
 				? prev.filter((i) => i !== index)
@@ -51,6 +52,7 @@ const SoundList = () => {
 							name={sound.name}
 							path={sound.path}
 							isPlaying={false}
+							//! the console is just an placeholder, will update when the "play" system works
 							onPlay={() => console.log('123')}
 							isFavorite={favorites.includes(index)}
 							onToggleFavorite={toggleFavorite}
