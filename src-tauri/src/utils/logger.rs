@@ -1,4 +1,3 @@
-use chrono::Local;
 use dirs::config_dir;
 use once_cell::sync::Lazy;
 use std::fs::{create_dir_all, OpenOptions};
@@ -33,7 +32,8 @@ impl Logger {
 
         let log_file = OpenOptions::new()
             .create(true)
-            .append(true)
+            .write(true)
+            .truncate(true)
             .open(&log_path)
             .ok();
 
@@ -41,10 +41,8 @@ impl Logger {
     }
 
     fn log(&mut self, level: LogLevel, function: &str, message: &str) {
-        let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
         let log_msg = format!(
-            "[{}] [{}] [{}]: \"{}\"",
-            timestamp,
+            "[{}] [{}]: \"{}\"",
             Self::level_to_str(&level),
             function,
             message
@@ -62,6 +60,16 @@ impl Logger {
             LogLevel::Error => "ERROR",
             LogLevel::Warn => "WARN",
             LogLevel::Debug => "DEBUG",
+        }
+    }
+
+    pub fn clear_file() {
+        if let Ok(_logger) = LOGGER.lock() {
+            if let Some(log_path) =
+                config_dir().map(|p| p.join("soundlab").join("logs").join("soundlab.log"))
+            {
+                let _ = OpenOptions::new().write(true).truncate(true).open(log_path);
+            }
         }
     }
 }

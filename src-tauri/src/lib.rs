@@ -1,4 +1,5 @@
 use dirs::config_dir;
+use utils::logger::Logger;
 use std::fs;
 use std::sync::Arc;
 use tauri::Builder;
@@ -12,20 +13,17 @@ mod utils;
 
 use crate::utils::logger::{log, LogLevel};
 use api::handlers::{
-    delete_sound, get_imported_paths, get_sounds, import_directory, import_sound, Api,
+    delete_sound, get_imported_paths, get_sounds, import_directory, import_sound, remove_imported_path, Api
 };
 use cache::cache::Cache;
 use db::connection::DatabasePool;
 use db::sound::SoundRepository;
 use import::importer::Importer;
 
-/// Main entry point for the Tauri application.
-///
-/// This function is the asynchronous entry point for running the Tauri app. It initializes
-/// the application, sets up necessary configurations, and starts the Tauri window. It also
-/// sets up database connection and ensures necessary directories and tables exist.
 #[tokio::main]
 pub async fn run() {
+    Logger::clear_file();
+    
     let app_data_path = config_dir().expect("Failed to get AppData directory");
     let db_path = app_data_path.join("soundlab").join("database.db");
 
@@ -69,6 +67,7 @@ pub async fn run() {
             get_sounds,
             delete_sound,
             get_imported_paths,
+            remove_imported_path
         ])
         .run(tauri::generate_context!())
         .expect("Error starting Tauri application");
