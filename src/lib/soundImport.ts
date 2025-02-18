@@ -2,11 +2,6 @@ import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import type { Sound } from '../types/Sound';
 
-/**
- * Importiert einen einzelnen Sound.
- * @param name - Name des Sounds
- * @param path - Dateipfad des Sounds
- */
 export async function importSound(name: string, path: string): Promise<void> {
 	try {
 		await invoke('import_sound', { name, path });
@@ -16,9 +11,6 @@ export async function importSound(name: string, path: string): Promise<void> {
 	}
 }
 
-/**
- * Importiert alle Sounds aus einem Verzeichnis.
- */
 export async function importDirectory(): Promise<void> {
 	try {
 		const selected = await open({ directory: true });
@@ -31,10 +23,6 @@ export async function importDirectory(): Promise<void> {
 	}
 }
 
-/**
- * Ruft alle gespeicherten Sounds ab.
- * @returns Array von Sound-Objekten
- */
 export const getSounds = async (): Promise<Sound[]> => {
 	try {
 		const sounds = (await invoke('get_sounds')) as {
@@ -55,10 +43,6 @@ export const getSounds = async (): Promise<Sound[]> => {
 	}
 };
 
-/**
- * Löscht einen Sound anhand seiner ID.
- * @param id - ID des Sounds
- */
 export async function deleteSound(id: string): Promise<void> {
 	try {
 		await invoke('delete_sound', { id });
@@ -68,10 +52,6 @@ export async function deleteSound(id: string): Promise<void> {
 	}
 }
 
-/**
- * Ruft alle importierten Pfade ab.
- * @returns Array von Sound-Objekten
- */
 export async function getImportedPaths(): Promise<Sound[]> {
 	try {
 		const paths = (await invoke('get_imported_paths')) as string[];
@@ -85,6 +65,15 @@ export async function getImportedPaths(): Promise<Sound[]> {
 		}));
 	} catch (error) {
 		console.error('Error fetching imported paths:', error);
+		throw error;
+	}
+}
+
+export async function removeImportedPath(path: string): Promise<void> {
+	try {
+		await invoke('remove_imported_path', { path });
+	} catch (error) {
+		console.error(`Error removing imported path '${path}':`, error);
 		throw error;
 	}
 }

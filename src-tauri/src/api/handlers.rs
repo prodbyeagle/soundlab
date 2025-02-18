@@ -3,7 +3,7 @@ use tauri::State;
 
 use crate::db::sound::{Sound, SoundRepository};
 use crate::import::importer::Importer;
-use crate::settings::manager::{add_import_path, get_import_paths};
+use crate::settings::manager::{add_import_path, get_import_paths, remove_import_path};
 
 #[derive(Clone)]
 pub struct Api {
@@ -55,6 +55,10 @@ impl Api {
     pub async fn get_imported_paths_method(&self) -> Result<Vec<String>, String> {
         Ok(get_import_paths())
     }
+
+    pub async fn remove_imported_path_method(&self, path: String) -> Result<Vec<String>, String> {
+        Ok(remove_import_path(&path))
+    }
 }
 
 #[tauri::command]
@@ -80,4 +84,12 @@ pub async fn delete_sound(api: State<'_, Api>, id: String) -> Result<(), String>
 #[tauri::command]
 pub async fn get_imported_paths(api: State<'_, Api>) -> Result<Vec<String>, String> {
     api.get_imported_paths_method().await
+}
+
+#[tauri::command]
+pub async fn remove_imported_path(
+    api: State<'_, Api>,
+    path: String,
+) -> Result<Vec<String>, String> {
+    api.remove_imported_path_method(path).await
 }

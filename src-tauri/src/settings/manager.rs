@@ -112,11 +112,22 @@ pub fn add_import_path(path: String) {
     }
 }
 
+pub fn remove_import_path(path: &str) -> Vec<String> {
+    let mut settings = SETTINGS.lock().unwrap();
+
+    if let Some(index) = settings.imported_paths.iter().position(|p| p == path) {
+        log(
+            LogLevel::Info,
+            "Config::remove_import_path",
+            &format!("Removing import path: '{}'", path),
+        );
+        settings.imported_paths.remove(index);
+        settings.save();
+    }
+
+    settings.imported_paths.clone()
+}
+
 pub fn get_import_paths() -> Vec<String> {
-    log(
-        LogLevel::Info,
-        "Config::get_import_paths",
-        "Retrieving import paths.",
-    );
     SETTINGS.lock().unwrap().imported_paths.clone()
 }

@@ -3,8 +3,8 @@ import { Button } from './ui/Button/Button';
 import { Trash, Plus } from 'lucide-react';
 import {
 	getImportedPaths,
-	deleteSound,
 	importDirectory,
+	removeImportedPath,
 } from '../lib/soundImport';
 import type { Sound } from '../types/Sound';
 
@@ -37,9 +37,11 @@ const FileImporter = () => {
 		}
 	};
 
-	const handleRemove = async (id: number) => {
+	const handleRemove = async (path: string) => {
 		try {
-			await deleteSound(id.toString());
+			await removeImportedPath(path);
+
+			//? recall the get imported paths to update the frontend with the new folder paths.
 			const sounds = await getImportedPaths();
 			setImportedPaths(sounds);
 		} catch (err) {
@@ -85,7 +87,7 @@ const FileImporter = () => {
 								</span>
 								<Button
 									icon={Trash}
-									onClick={() => handleRemove(sound.id)}
+									onClick={() => handleRemove(sound.path)}
 								/>
 							</div>
 						))
