@@ -43,7 +43,9 @@ pub async fn run() {
         "CREATE TABLE IF NOT EXISTS sounds (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            path TEXT NOT NULL
+            path TEXT NOT NULL,
+            is_favorite BOOLEAN NOT NULL DEFAULT 0, 
+            tags JSON NOT NULL DEFAULT '[]'      
         )",
     )
     .execute(&*db_pool.get_db())
