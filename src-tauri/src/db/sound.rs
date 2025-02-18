@@ -27,11 +27,6 @@ impl SoundRepository {
     }
 
     pub async fn insert(&self, sound: Sound) -> Result<i64, Error> {
-        log(
-            LogLevel::Info,
-            "SoundRepository::insert",
-            &format!("Inserting sound: {:?}", sound),
-        );
         let result =
             sqlx::query("INSERT INTO sounds (name, path, is_favorite, tags) VALUES (?, ?, ?, ?)")
                 .bind(&sound.name)
@@ -44,11 +39,6 @@ impl SoundRepository {
         match result {
             Ok(res) => {
                 let id = res.last_insert_rowid();
-                log(
-                    LogLevel::Info,
-                    "SoundRepository::insert",
-                    &format!("Successfully inserted sound with ID: {}", id),
-                );
                 Ok(id)
             }
             Err(err) => {
@@ -63,11 +53,6 @@ impl SoundRepository {
     }
 
     pub async fn get_all(&self) -> Result<Vec<Sound>, Error> {
-        log(
-            LogLevel::Info,
-            "SoundRepository::get_all",
-            "Fetching all sounds.",
-        );
         let result =
             sqlx::query_as::<_, Sound>("SELECT id, name, path, is_favorite, tags FROM sounds")
                 .fetch_all(&*self.pool)
@@ -75,11 +60,6 @@ impl SoundRepository {
 
         match result {
             Ok(sounds) => {
-                log(
-                    LogLevel::Info,
-                    "SoundRepository::get_all",
-                    &format!("Fetched {} sounds.", sounds.len()),
-                );
                 Ok(sounds)
             }
             Err(err) => {
@@ -94,11 +74,6 @@ impl SoundRepository {
     }
 
     pub async fn delete(&self, id: i64) -> Result<(), Error> {
-        log(
-            LogLevel::Info,
-            "SoundRepository::delete",
-            &format!("Deleting sound with ID: {}", id),
-        );
         let result = sqlx::query("DELETE FROM sounds WHERE id = ?")
             .bind(id)
             .execute(&*self.pool)
