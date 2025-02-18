@@ -19,24 +19,11 @@
 				"minHeight": 800,
 				"minWidth": 480
 			}
-		],
-		"security": {
-			"csp": "default-src 'self' ipc: http://ipc.localhost; img-src 'self' asset: https: http: data: http://asset.localhost; media-src 'self' asset: blob: http://asset.localhost http://tauri.localhost; style-src 'self' 'unsafe-inline'",
-			"assetProtocol": {
-				"enable": true,
-				"scope": ["**"]
-			}
-		}
+		]
 	},
 	"bundle": {
 		"active": true,
 		"targets": "msi",
-		"icon": [
-			"icons/icon.png",
-			"icons/128x128.png",
-			"icons/128x128@2x.png",
-			"icons/icon.icns",
-			"icons/icon.ico"
-		]
+		"icon": ["icons/icon.png"]
 	}
 }
