@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import SoundCard from './SoundCard';
-import { toggleFavorite, getSounds } from '../../lib/soundImport';
+import { getSounds } from '../../lib/soundImport';
 import type { Sound } from '../../types/Sound';
 
 const SoundList = () => {
