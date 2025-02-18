@@ -8,7 +8,7 @@ import type { CardProps } from './Card.types';
 export const Card = ({ children, className }: CardProps) => {
 	return (
 		<div
-			className={`rounded-xl border border-neutral-200 bg-neutral-100 p-6 dark:border-neutral-800 dark:bg-neutral-950 ${className || ''}`}>
+			className={`rounded-xl border border-neutral-200 bg-neutral-100 p-6 dark:border-neutral-900 dark:bg-neutral-950 ${className || ''}`}>
 			{children}
 		</div>
 	);
