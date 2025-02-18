@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
-import { Sound } from '../types/Sound';
+import type { Sound } from '../types/Sound';
 
 /**
  * Importiert einen einzelnen Sound.
@@ -38,17 +38,16 @@ export async function importDirectory(): Promise<void> {
 export const getSounds = async (): Promise<Sound[]> => {
 	try {
 		const sounds = (await invoke('get_sounds')) as {
-			id: string; // Assuming `id` is returned as a string
+			id: string;
 			name: string;
 			path: string;
 		}[];
 
-		// Convert the sounds to match the Sound interface
 		return sounds.map((sound) => ({
-			id: parseInt(sound.id, 10), // Convert string id to number
+			id: parseInt(sound.id, 10),
 			name: sound.name,
 			path: sound.path,
-			isFavorite: false, // Default value, update as needed
+			isFavorite: false,
 		}));
 	} catch (error) {
 		console.error('Error fetching sounds:', error);
@@ -79,12 +78,24 @@ export async function getImportedPaths(): Promise<Sound[]> {
 
 		return paths.map((path, index) => ({
 			id: index + 1,
+			//! maybe change logic so we can use the "real" name of the sound. but this works too.
 			name: path.split('\\').pop()?.split('/').pop() ?? 'Unknown Sound',
 			path,
 			isFavorite: false,
 		}));
 	} catch (error) {
 		console.error('Error fetching imported paths:', error);
+		throw error;
+	}
+}
+
+export async function toggleFavorite(id: string): Promise<string> {
+	try {
+		const result = await invoke('toggle_favorite', { id });
+
+		return result as string;
+	} catch (error) {
+		console.error('Error toggling sound favorite status:', error);
 		throw error;
 	}
 }
