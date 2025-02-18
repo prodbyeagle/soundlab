@@ -1,4 +1,5 @@
 use futures::future::join_all;
+use sqlx::types::Json;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::fs;
@@ -6,37 +7,16 @@ use tokio::fs;
 use crate::cache::cache::Cache;
 use crate::db::sound::{Sound, SoundRepository};
 
-/// A struct for importing sound files, interacting with both the sound repository and the cache.
 pub struct Importer {
     repo: Arc<SoundRepository>,
     cache: Arc<Cache>,
 }
 
 impl Importer {
-    /// Creates a new `Importer` instance with a given `SoundRepository` and `Cache`.
-    ///
-    /// # Arguments
-    ///
-    /// * `repo` - The `SoundRepository` for inserting sound records into the database.
-    /// * `cache` - The `Cache` for storing sound data in-memory.
-    ///
-    /// # Returns
-    ///
-    /// A new `Importer` wrapped in an `Arc`.
     pub fn new(repo: Arc<SoundRepository>, cache: Arc<Cache>) -> Arc<Self> {
         Arc::new(Self { repo, cache })
     }
 
-    /// Imports a single sound file by checking if it exists and is not already cached.
-    ///
-    /// # Arguments
-    ///
-    /// * `name` - The name of the sound file.
-    /// * `path` - The path to the sound file on disk.
-    ///
-    /// # Returns
-    ///
-    /// A `Result` indicating success or an error message if any issues arise.
     pub async fn import_sound(self: &Arc<Self>, name: &str, path: &str) -> Result<(), String> {
         if self.cache.get_cached_sound(name).await.is_some() {
             println!("Sound '{}' already cached, skipping import.", name);
@@ -52,6 +32,8 @@ impl Importer {
             id: None,
             name: name.to_string(),
             path: path.to_string(),
+            is_favorite: false,
+            tags: Json(Vec::new()),
         };
 
         match self.repo.insert(sound).await {
@@ -69,15 +51,6 @@ impl Importer {
         Ok(())
     }
 
-    /// Imports all sound files (MP3 or WAV) from a specified directory.
-    ///
-    /// # Arguments
-    ///
-    /// * `dir_path` - The path to the directory containing sound files to import.
-    ///
-    /// # Returns
-    ///
-    /// A `Result` indicating success or failure of the operation.
     pub async fn import_directory(self: &Arc<Self>, dir_path: &str) -> Result<(), String> {
         let mut entries = fs::read_dir(dir_path)
             .await
