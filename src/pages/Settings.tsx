@@ -1,4 +1,3 @@
-// Settings.tsx
 import Layout from '../components/Layout';
 import FileImporter from '../components/FileImporter';
 import { Card } from '../components/ui/Card/Card';
