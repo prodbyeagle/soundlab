@@ -4,23 +4,6 @@ import { Minus, Square, X, Maximize2 } from 'lucide-react';
 
 const Titlebar = () => {
 	const [isMaximized, setIsMaximized] = useState(false);
-	const [appIcon, setAppIcon] = useState('/icon.png');
-
-	useEffect(() => {
-		const initialIcon = localStorage.getItem('appIcon') || '/icon.png';
-		setAppIcon(initialIcon);
-
-		const handleStorageChange = () => {
-			const updatedIcon = localStorage.getItem('appIcon') || '/icon.png';
-			setAppIcon(updatedIcon);
-		};
-
-		window.addEventListener('storage', handleStorageChange);
-
-		return () => {
-			window.removeEventListener('storage', handleStorageChange);
-		};
-	}, []);
 
 	useEffect(() => {
 		const updateMaximizedState = async () => {
@@ -61,8 +44,8 @@ const Titlebar = () => {
 			<div
 				data-tauri-drag-region
 				className='pointer-events-none flex items-center gap-2 px-3 py-1.5'>
-				<img src={appIcon} alt='Logo' className='h-5 w-5' />
-				<span className='text-xs font-medium text-neutral-300'>
+				<img src="./icon.png" alt='Logo' className='h-5' />
+				<span className='text-sm font-medium text-neutral-300'>
 					SoundLab
 				</span>
 			</div>
