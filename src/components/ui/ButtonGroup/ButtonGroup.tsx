@@ -35,7 +35,7 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
 		<div
 			className={cn(
 				'mx-auto flex w-full gap-1 rounded-lg p-1',
-				'dark:border-border border border-neutral-200 bg-neutral-100 dark:bg-neutral-950',
+				'dark:border-neutral-900 border border-neutral-200 bg-neutral-100 dark:bg-neutral-950',
 				className
 			)}>
 			{buttons.map(({ label, icon: Icon }) => (
