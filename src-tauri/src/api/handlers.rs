@@ -9,7 +9,6 @@ use crate::settings::manager::{add_import_path, get_import_paths};
 pub struct Api {
     pub repo: Arc<SoundRepository>,
     pub importer: Arc<Importer>,
-    // pub cache: Arc<Cache>,
 }
 
 impl Api {
