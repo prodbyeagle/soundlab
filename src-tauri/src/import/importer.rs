@@ -1,3 +1,4 @@
+use crate::utils::logger::{log, LogLevel};
 use futures::future::join_all;
 use sqlx::types::Json;
 use std::path::Path;
@@ -14,17 +15,32 @@ pub struct Importer {
 
 impl Importer {
     pub fn new(repo: Arc<SoundRepository>, cache: Arc<Cache>) -> Arc<Self> {
+        log(LogLevel::Info, "Importer::new", "Initializing Importer.");
         Arc::new(Self { repo, cache })
     }
 
     pub async fn import_sound(self: &Arc<Self>, name: &str, path: &str) -> Result<(), String> {
+        log(
+            LogLevel::Info,
+            "Importer::import_sound",
+            &format!("Attempting to import sound '{}'", name),
+        );
+
         if self.cache.get_cached_sound(name).await.is_some() {
-            println!("Sound '{}' already cached, skipping import.", name);
+            log(
+                LogLevel::Warn,
+                "Importer::import_sound",
+                &format!("Sound '{}' already cached, skipping.", name),
+            );
             return Ok(());
         }
 
         if !Path::new(path).exists() {
-            eprintln!("Error: File '{}' not found.", path);
+            log(
+                LogLevel::Error,
+                "Importer::import_sound",
+                &format!("File '{}' not found.", path),
+            );
             return Ok(());
         }
 
@@ -41,10 +57,18 @@ impl Importer {
                 self.cache
                     .cache_sound(name.to_string(), path.to_string())
                     .await;
-                println!("Sound '{}' imported successfully (ID: {}).", name, sound_id);
+                log(
+                    LogLevel::Info,
+                    "Importer::import_sound",
+                    &format!("Sound '{}' imported successfully (ID: {}).", name, sound_id),
+                );
             }
             Err(e) => {
-                eprintln!("Error importing '{}': {}", name, e);
+                log(
+                    LogLevel::Error,
+                    "Importer::import_sound",
+                    &format!("Error importing '{}': {}", name, e),
+                );
             }
         }
 
@@ -52,6 +76,12 @@ impl Importer {
     }
 
     pub async fn import_directory(self: &Arc<Self>, dir_path: &str) -> Result<(), String> {
+        log(
+            LogLevel::Info,
+            "Importer::import_directory",
+            &format!("Importing directory '{}'", dir_path),
+        );
+
         let mut entries = fs::read_dir(dir_path)
             .await
             .map_err(|e| format!("Error reading directory '{}': {}", dir_path, e))?;
@@ -76,7 +106,11 @@ impl Importer {
                     let importer = Arc::clone(self);
                     tasks.push(tokio::spawn(async move {
                         if let Err(e) = importer.import_sound(&name, &path_str).await {
-                            eprintln!("Error importing '{}': {}", name, e);
+                            log(
+                                LogLevel::Error,
+                                "Importer::import_directory",
+                                &format!("Error importing '{}': {}", name, e),
+                            );
                         }
                     }));
                 }
@@ -85,7 +119,12 @@ impl Importer {
 
         join_all(tasks).await;
 
-        println!("Import complete for directory: {}", dir_path);
+        log(
+            LogLevel::Info,
+            "Importer::import_directory",
+            &format!("Import complete for directory '{}'", dir_path),
+        );
+
         Ok(())
     }
 }
