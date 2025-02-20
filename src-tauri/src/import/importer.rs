@@ -10,7 +10,7 @@ use crate::db::sound::{Sound, SoundRepository};
 
 pub struct Importer {
     repo: Arc<SoundRepository>,
-    cache: Arc<Cache>,
+    pub cache: Arc<Cache>,
 }
 
 impl Importer {
@@ -31,6 +31,20 @@ impl Importer {
                 LogLevel::Warn,
                 "Importer::import_sound",
                 &format!("Sound '{}' already cached, skipping.", name),
+            );
+            return Ok(());
+        }
+
+        if self
+            .repo
+            .exists(name)
+            .await
+            .map_err(|e| format!("DB check failed: {}", e))?
+        {
+            log(
+                LogLevel::Warn,
+                "Importer::import_sound",
+                &format!("Sound '{}' already exists in database, skipping.", name),
             );
             return Ok(());
         }
@@ -75,44 +89,43 @@ impl Importer {
         Ok(())
     }
 
-    pub async fn import_directory(self: &Arc<Self>, dir_path: &str) -> Result<(), String> {
+    pub async fn import_directory(self: &Arc<Self>, root_path: &str) -> Result<(), String> {
         log(
             LogLevel::Info,
             "Importer::import_directory",
-            &format!("Importing directory '{}'", dir_path),
+            &format!("Scanning directory '{}'", root_path),
         );
 
-        let mut entries = fs::read_dir(dir_path)
-            .await
-            .map_err(|e| format!("Error reading directory '{}': {}", dir_path, e))?;
-
+        let mut stack = vec![root_path.to_string()];
         let mut tasks = vec![];
 
-        while let Some(entry) = entries
-            .next_entry()
-            .await
-            .map_err(|e| format!("Error iterating through directory '{}': {}", dir_path, e))?
-        {
-            let path = entry.path();
-            if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
-                if ext.eq_ignore_ascii_case("mp3") || ext.eq_ignore_ascii_case("wav") {
-                    let name = path
-                        .file_stem()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or("unknown")
-                        .to_string();
-                    let path_str = path.to_string_lossy().into_owned();
+        while let Some(dir_path) = stack.pop() {
+            let mut entries = fs::read_dir(&dir_path)
+                .await
+                .map_err(|e| format!("Error reading directory '{}': {}", dir_path, e))?;
 
-                    let importer = Arc::clone(self);
-                    tasks.push(tokio::spawn(async move {
-                        if let Err(e) = importer.import_sound(&name, &path_str).await {
-                            log(
-                                LogLevel::Error,
-                                "Importer::import_directory",
-                                &format!("Error importing '{}': {}", name, e),
-                            );
-                        }
-                    }));
+            while let Some(entry) = entries
+                .next_entry()
+                .await
+                .map_err(|e| format!("Error iterating directory '{}': {}", dir_path, e))?
+            {
+                let path = entry.path();
+
+                if path.is_dir() {
+                    stack.push(path.to_string_lossy().into_owned());
+                } else if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
+                    if ext.eq_ignore_ascii_case("mp3") || ext.eq_ignore_ascii_case("wav") {
+                        let name = path
+                            .file_stem()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or("unknown")
+                            .to_string();
+                        let path_str = path.to_string_lossy().into_owned();
+                        tasks.push({
+                            let importer = Arc::clone(self);
+                            async move { importer.import_sound(&name, &path_str).await }
+                        });
+                    }
                 }
             }
         }
@@ -122,7 +135,7 @@ impl Importer {
         log(
             LogLevel::Info,
             "Importer::import_directory",
-            &format!("Import complete for directory '{}'", dir_path),
+            &format!("Finished importing directory '{}'", root_path),
         );
 
         Ok(())
