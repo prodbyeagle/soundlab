@@ -20,18 +20,7 @@ impl Importer {
     }
 
     pub async fn import_sound(self: &Arc<Self>, name: &str, path: &str) -> Result<(), String> {
-        log(
-            LogLevel::Info,
-            "Importer::import_sound",
-            &format!("Attempting to import sound '{}'", name),
-        );
-
         if self.cache.get_cached_sound(name).await.is_some() {
-            log(
-                LogLevel::Warn,
-                "Importer::import_sound",
-                &format!("Sound '{}' already cached, skipping.", name),
-            );
             return Ok(());
         }
 
@@ -41,20 +30,10 @@ impl Importer {
             .await
             .map_err(|e| format!("DB check failed: {}", e))?
         {
-            log(
-                LogLevel::Warn,
-                "Importer::import_sound",
-                &format!("Sound '{}' already exists in database, skipping.", name),
-            );
             return Ok(());
         }
 
         if !Path::new(path).exists() {
-            log(
-                LogLevel::Error,
-                "Importer::import_sound",
-                &format!("File '{}' not found.", path),
-            );
             return Ok(());
         }
 
@@ -66,36 +45,22 @@ impl Importer {
             tags: Json(Vec::new()),
         };
 
-        match self.repo.insert(sound).await {
-            Ok(sound_id) => {
-                self.cache
-                    .cache_sound(name.to_string(), path.to_string())
-                    .await;
-                log(
-                    LogLevel::Info,
-                    "Importer::import_sound",
-                    &format!("Sound '{}' imported successfully (ID: {}).", name, sound_id),
-                );
-            }
-            Err(e) => {
-                log(
-                    LogLevel::Error,
-                    "Importer::import_sound",
-                    &format!("Error importing '{}': {}", name, e),
-                );
-            }
+        if let Err(e) = self.repo.insert(sound).await {
+            log(
+                LogLevel::Error,
+                "Importer::import_sound",
+                &format!("Error importing '{}': {}", name, e),
+            );
+        } else {
+            self.cache
+                .cache_sound(name.to_string(), path.to_string())
+                .await;
         }
 
         Ok(())
     }
 
     pub async fn import_directory(self: &Arc<Self>, root_path: &str) -> Result<(), String> {
-        log(
-            LogLevel::Info,
-            "Importer::import_directory",
-            &format!("Scanning directory '{}'", root_path),
-        );
-
         let mut stack = vec![root_path.to_string()];
         let mut tasks = vec![];
 
@@ -131,12 +96,6 @@ impl Importer {
         }
 
         join_all(tasks).await;
-
-        log(
-            LogLevel::Info,
-            "Importer::import_directory",
-            &format!("Finished importing directory '{}'", root_path),
-        );
 
         Ok(())
     }
