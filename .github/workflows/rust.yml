@@ -1,11 +1,13 @@
 name: Rust Lint & Format
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
 
 jobs:
   lint:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -15,12 +17,13 @@ jobs:
         with:
           components: rustfmt, clippy
 
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
       - name: Check Formatting
-        run: |
-          cd src-tauri
-          cargo fmt -- --check
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 
       - name: Run Clippy
-        run: |
-          cd src-tauri
-          cargo clippy -- -D warnings
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
