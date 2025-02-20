@@ -22,22 +22,17 @@ impl Cache {
     }
 
     pub async fn cache_sound(&self, name: String, path: String) {
-        log(
-            LogLevel::Info,
-            "Cache::cache_sound",
-            &format!("Caching sound: '{}' -> '{}'", name, path),
-        );
         let mut cache = self.sound_cache.lock().await;
         cache.put(name, path);
     }
 
     pub async fn get_cached_sound(&self, name: &str) -> Option<String> {
-        log(
-            LogLevel::Info,
-            "Cache::get_cached_sound",
-            &format!("Retrieving cached sound: '{}'", name),
-        );
         let mut cache = self.sound_cache.lock().await;
         cache.get(name).cloned()
+    }
+
+    pub async fn remove_cached_sound(&self, name: &str) {
+        let mut cache = self.sound_cache.lock().await;
+        cache.pop(name);
     }
 }

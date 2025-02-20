@@ -102,11 +102,6 @@ impl Config {
 pub fn add_import_path(path: String) {
     let mut settings = SETTINGS.lock().unwrap();
     if !settings.imported_paths.contains(&path) {
-        log(
-            LogLevel::Info,
-            "Config::add_import_path",
-            &format!("Adding import path: '{}'", path),
-        );
         settings.imported_paths.push(path);
         settings.save();
     }
@@ -116,11 +111,6 @@ pub fn remove_import_path(path: &str) -> Vec<String> {
     let mut settings = SETTINGS.lock().unwrap();
 
     if let Some(index) = settings.imported_paths.iter().position(|p| p == path) {
-        log(
-            LogLevel::Info,
-            "Config::remove_import_path",
-            &format!("Removing import path: '{}'", path),
-        );
         settings.imported_paths.remove(index);
         settings.save();
     }
