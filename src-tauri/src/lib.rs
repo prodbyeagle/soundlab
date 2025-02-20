@@ -13,7 +13,8 @@ mod utils;
 
 use crate::utils::logger::{log, LogLevel};
 use api::handlers::{
-    delete_sound, get_imported_paths, get_sounds, import_directory, import_sound, recache_sounds, remove_imported_path, toggle_favorite, Api
+    delete_sound, get_imported_paths, get_sounds, import_directory, import_sound, recache_sounds,
+    remove_imported_path, toggle_favorite, Api,
 };
 use cache::cache::Cache;
 use db::connection::DatabasePool;
