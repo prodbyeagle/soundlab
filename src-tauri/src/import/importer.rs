@@ -5,7 +5,7 @@ use std::path::Path;
 use std::sync::Arc;
 use tokio::fs;
 
-use crate::cache::cache::Cache;
+use crate::cache::cache_module::Cache;
 use crate::db::sound::{Sound, SoundRepository};
 
 pub struct Importer {

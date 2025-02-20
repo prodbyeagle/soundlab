@@ -16,7 +16,7 @@ use api::handlers::{
     delete_sound, get_imported_paths, get_sounds, import_directory, import_sound, recache_sounds,
     remove_imported_path, toggle_favorite, Api,
 };
-use cache::cache::Cache;
+use cache::cache_module::Cache;
 use db::connection::DatabasePool;
 use db::sound::SoundRepository;
 use import::importer::Importer;

@@ -41,7 +41,7 @@ impl Config {
                     log(
                         LogLevel::Error,
                         "Config::load",
-                        &format!("Failed to parse config, using default settings."),
+                        "Failed to parse config, using default settings.",
                     );
                     Self::new()
                 })
