@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import Layout from '../components/Layout';
-import Sidebar from '../components/library/Sidebar';
-import { SoundList } from '../components/library/Soundlist';
-import { Dialog } from '../components/ui/Dialog/Dialog';
-import { Button } from '../components/ui/Button/Button';
 import { SlidersHorizontal } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { SoundList } from '../components/library/Soundlist';
+import { Button } from '../components/ui/Button/Button';
+import { Dialog } from '../components/ui/Dialog/Dialog';
+import { Sidebar } from '../components/library/Sidebar';
+import Layout from '../components/Layout';
 
 const Library = () => {
 	const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
@@ -14,29 +14,27 @@ const Library = () => {
 		sortBy: 'date',
 	});
 
+	const handleFiltersChange = useCallback(
+		(newFilters: { search: string; tags: string[]; sortBy: string }) => {
+			setFilters((prev) => ({ ...prev, ...newFilters }));
+		},
+		[]
+	);
+
 	return (
 		<Layout>
 			<div className='relative flex gap-4'>
 				<div className='hidden lg:block'>
-					<Sidebar
-						onFiltersChange={(newFilters) =>
-							setFilters((prev) => ({ ...prev, ...newFilters }))
-						}
-					/>
+					<Sidebar onFiltersChange={handleFiltersChange} />
 				</div>
 
 				<Dialog
 					isOpen={isFilterDialogOpen}
 					onClose={() => setIsFilterDialogOpen(false)}>
-					<div>
+					<div className='max-h-[80vh] overflow-y-auto'>
 						<Sidebar
 							className='border-0'
-							onFiltersChange={(newFilters) =>
-								setFilters((prev) => ({
-									...prev,
-									...newFilters,
-								}))
-							}
+							onFiltersChange={handleFiltersChange}
 						/>
 					</div>
 				</Dialog>
@@ -45,7 +43,7 @@ const Library = () => {
 					icon={SlidersHorizontal}
 					size='sm'
 					onClick={() => setIsFilterDialogOpen(true)}
-					className='fixed right-4 bottom-4 z-50 backdrop-blur-xs lg:hidden'
+					className='fixed right-4 bottom-4 z-50 shadow-lg shadow-neutral-900/20 backdrop-blur-sm lg:hidden'
 				/>
 
 				<div className='flex-1 rounded-xl border-neutral-800 sm:border sm:p-4'>

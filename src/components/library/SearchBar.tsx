@@ -7,7 +7,7 @@ interface SearchBarProps {
 	onChange: (value: string) => void;
 }
 
-const SearchBar = ({ value, onChange }: SearchBarProps) => {
+export const SearchBar = ({ value, onChange }: SearchBarProps) => {
 	const [query, setQuery] = useState(value);
 
 	useEffect(() => {
@@ -28,5 +28,3 @@ const SearchBar = ({ value, onChange }: SearchBarProps) => {
 		/>
 	);
 };
-
-export default SearchBar;

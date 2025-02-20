@@ -7,6 +7,7 @@ interface SoundCardProps {
 	name: string;
 	path: string;
 	duration?: string;
+	tags?: string[];
 	isPlaying: boolean;
 	onPlay: (index: number, path: string) => void;
 	is_favorite: boolean;
@@ -14,12 +15,12 @@ interface SoundCardProps {
 }
 
 export const SoundCard = ({
-	index,
 	name,
-	path,
+	// path,
 	duration = '1:30',
 	isPlaying,
-	onPlay,
+	tags = ['808'],
+	// onPlay,
 	is_favorite,
 	onToggleFavorite,
 }: SoundCardProps) => {
@@ -30,7 +31,7 @@ export const SoundCard = ({
 			ref={cardRef}
 			className={cn(
 				'group relative overflow-hidden rounded-lg border',
-				'transition-all duration-300 ease-in-out',
+				'transition-all duration-100 ease-in-out',
 				isPlaying
 					? 'border-neutral-700 bg-neutral-900/90'
 					: 'border-neutral-900 bg-neutral-950 hover:border-neutral-800 hover:bg-neutral-900/50'
@@ -54,17 +55,17 @@ export const SoundCard = ({
 							</span>
 							<span className='flex items-center gap-1'>
 								<Volume2 size={12} />
-								Ambient
+								{tags[0]}
 							</span>
 						</div>
 					</div>
 					<button
 						onClick={onToggleFavorite}
 						className={cn(
-							'group/fav flex h-10 w-10 items-center justify-center rounded-full',
+							'group/fav flex h-10 w-10 items-center justify-center rounded-lg',
 							'transition-all duration-200',
-							'hover:bg-neutral-800/80',
-							is_favorite && 'bg-red-500/10'
+							is_favorite && 'bg-red-500/10',
+							!is_favorite && 'bg-neutral-900/20'
 						)}
 						aria-label={
 							is_favorite
@@ -73,7 +74,7 @@ export const SoundCard = ({
 						}>
 						<Heart
 							fill={is_favorite ? 'currentColor' : 'none'}
-							size={18}
+							size={20}
 							className={cn(
 								'transition-all duration-200',
 								is_favorite

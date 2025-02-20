@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getSounds } from '../../lib/soundImport';
-import SearchBar from './SearchBar';
+import { SearchBar } from './SearchBar';
 import { Select } from '../ui/Select/Select';
 import { Button } from '../ui/Button/Button';
 
@@ -19,7 +19,7 @@ const sortOptions = [
 	{ value: 'length', label: 'Length' },
 ];
 
-const Sidebar = ({ className = '', onFiltersChange }: SidebarProps) => {
+export const Sidebar = ({ className = '', onFiltersChange }: SidebarProps) => {
 	const [search, setSearch] = useState('');
 	const [sortBy, setSortBy] = useState(sortOptions[0].value);
 	const [availableTags, setAvailableTags] = useState<string[]>([]);
@@ -112,5 +112,3 @@ const Sidebar = ({ className = '', onFiltersChange }: SidebarProps) => {
 		</aside>
 	);
 };
-
-export default Sidebar;
