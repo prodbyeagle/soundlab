@@ -71,14 +71,15 @@ export const Favorites = () => {
 							))}
 						</div>
 					) : favorites.length === 0 ? (
-						<div className='flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-dashed border-neutral-200 bg-neutral-50 p-8 text-center dark:border-neutral-800 dark:bg-neutral-900/20'>
-							<HeartCrack className='animate-spring mb-4 h-12 w-12 rotate-20 text-neutral-400 transition-all duration-100 hover:rotate-0' />
-							<p className='text-lg font-medium text-neutral-600 dark:text-neutral-400'>
-								No favorite sounds yet
-							</p>
-							<p className='mt-1 text-sm text-neutral-500 dark:text-neutral-500'>
-								Start adding sounds to your favorites to see
-								them here
+						<div className='flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed border-neutral-800 bg-neutral-900/20 p-8 text-center'>
+							<div className='flex h-16 w-16 items-center justify-center rounded-full bg-neutral-800/30'>
+								<HeartCrack className='h-8 w-8 text-neutral-400' />
+							</div>
+							<h3 className='mt-6 text-lg font-medium text-neutral-200'>
+								No Favorite sounds yet
+							</h3>
+							<p className='mt-2 max-w-sm text-sm text-neutral-500'>
+								Start favoriting sounds to see them here
 							</p>
 						</div>
 					) : (
