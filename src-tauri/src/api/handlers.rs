@@ -59,6 +59,49 @@ impl Api {
     pub async fn remove_imported_path_method(&self, path: String) -> Result<Vec<String>, String> {
         Ok(remove_import_path(&path))
     }
+
+    pub async fn toggle_favorite_method(&self, id: i64) -> Result<String, String> {
+        let mut sound = self
+            .repo
+            .get(id)
+            .await
+            .map_err(|e| format!("Error fetching sound: {}", e))?;
+
+        sound.is_favorite = !sound.is_favorite;
+        self.repo
+            .update(&sound)
+            .await
+            .map_err(|e| format!("Error updating favorite status: {}", e))?;
+
+        Ok(if sound.is_favorite {
+            "Added to favorites"
+        } else {
+            "Removed from favorites"
+        }
+        .to_string())
+    }
+
+    pub async fn recache_sounds_method(&self) -> Result<(), String> {
+        let active_paths = get_import_paths();
+        let sounds = self
+            .repo
+            .get_all()
+            .await
+            .map_err(|e| format!("Error fetching sounds: {}", e))?;
+
+        for sound in sounds {
+            if !active_paths.iter().any(|path| sound.path.starts_with(path)) {
+                if let Some(id) = sound.id {
+                    self.repo
+                        .delete(id)
+                        .await
+                        .map_err(|e| format!("Error deleting sound: {}", e))?;
+                    self.importer.cache.remove_cached_sound(&sound.name).await;
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 #[tauri::command]
@@ -92,4 +135,14 @@ pub async fn remove_imported_path(
     path: String,
 ) -> Result<Vec<String>, String> {
     api.remove_imported_path_method(path).await
+}
+
+#[tauri::command]
+pub async fn toggle_favorite(api: State<'_, Api>, id: i64) -> Result<String, String> {
+    api.toggle_favorite_method(id).await
+}
+
+#[tauri::command]
+pub async fn recache_sounds(api: State<'_, Api>) -> Result<(), String> {
+    api.recache_sounds_method().await
 }

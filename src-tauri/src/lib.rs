@@ -1,8 +1,8 @@
 use dirs::config_dir;
-use utils::logger::Logger;
 use std::fs;
 use std::sync::Arc;
 use tauri::Builder;
+use utils::logger::Logger;
 
 mod api;
 mod cache;
@@ -13,7 +13,7 @@ mod utils;
 
 use crate::utils::logger::{log, LogLevel};
 use api::handlers::{
-    delete_sound, get_imported_paths, get_sounds, import_directory, import_sound, remove_imported_path, Api
+    delete_sound, get_imported_paths, get_sounds, import_directory, import_sound, recache_sounds, remove_imported_path, toggle_favorite, Api
 };
 use cache::cache::Cache;
 use db::connection::DatabasePool;
@@ -23,7 +23,7 @@ use import::importer::Importer;
 #[tokio::main]
 pub async fn run() {
     Logger::clear_file();
-    
+
     let app_data_path = config_dir().expect("Failed to get AppData directory");
     let db_path = app_data_path.join("soundlab").join("database.db");
 
@@ -56,7 +56,7 @@ pub async fn run() {
 
     let api = Arc::new(Api::new(sound_repo.clone(), Arc::clone(&importer)));
 
-    log(LogLevel::Info, "run", "Starting Tauri application");
+    log(LogLevel::Info, "run", "Starting application");
 
     Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -65,9 +65,11 @@ pub async fn run() {
             import_sound,
             import_directory,
             get_sounds,
+            toggle_favorite,
             delete_sound,
             get_imported_paths,
-            remove_imported_path
+            remove_imported_path,
+            recache_sounds
         ])
         .run(tauri::generate_context!())
         .expect("Error starting Tauri application");
