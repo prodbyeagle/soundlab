@@ -5,10 +5,7 @@ import { Button } from '../ui/Button/Button';
 
 interface SidebarProps {
 	className?: string;
-	onFiltersChange: (filters: {
-		search: string;
-		tags: string[];
-	}) => void;
+	onFiltersChange: (filters: { search: string; tags: string[] }) => void;
 }
 
 export const Sidebar = ({ className = '', onFiltersChange }: SidebarProps) => {
