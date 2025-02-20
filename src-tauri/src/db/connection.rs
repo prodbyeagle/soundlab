@@ -4,12 +4,25 @@ use std::fs;
 use std::path::Path;
 use std::sync::Arc;
 
+/// Represents a connection pool for an SQLite database.
 #[derive(Clone)]
 pub struct DatabasePool {
     db: Arc<Pool<Sqlite>>,
 }
 
 impl DatabasePool {
+    /// Creates a new database connection pool.
+    ///
+    /// This function attempts to connect to an SQLite database at the specified path.
+    /// If the database file does not exist, it will be created.
+    ///
+    /// # Arguments
+    ///
+    /// * `db_path` - The file path of the SQLite database.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `Result` containing the `DatabasePool` on success or an `sqlx::Error` on failure.
     pub async fn new(db_path: &str) -> Result<Self, Error> {
         log(
             LogLevel::Info,
@@ -58,6 +71,13 @@ impl DatabasePool {
         }
     }
 
+    /// Retrieves the database connection pool.
+    ///
+    /// This function returns an `Arc` containing the `sqlx::Pool<Sqlite>`.
+    ///
+    /// # Returns
+    ///
+    /// An `Arc<Pool<Sqlite>>` that can be shared across the application.
     pub fn get_db(&self) -> Arc<Pool<Sqlite>> {
         log(
             LogLevel::Debug,

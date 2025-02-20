@@ -3,6 +3,7 @@ import { SoundCard } from './SoundCard';
 import { getSounds, toggleFavorite } from '../../lib/soundImport';
 import type { Sound } from '../../types/Sound';
 import { HeartCrack, Music2, Loader2 } from 'lucide-react';
+import { Spinner } from '../ui/Spinner/Spinner';
 
 interface SoundListProps {
 	searchQuery: string;
@@ -63,7 +64,7 @@ export const SoundList = ({ searchQuery, selectedTags }: SoundListProps) => {
 		return (
 			<div className='flex min-h-[400px] items-center justify-center'>
 				<div className='flex flex-col items-center gap-4'>
-					<Loader2 className='h-8 w-8 animate-spin text-neutral-400' />
+					<Spinner size={32} />
 					<p className='text-sm text-neutral-500'>
 						Loading sounds...
 					</p>
