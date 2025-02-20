@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from './ui/Button/Button';
-import { Trash, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import {
 	getImportedPaths,
 	importDirectory,
@@ -12,6 +12,7 @@ import type { Sound } from '../types/Sound';
 const FileImporter = () => {
 	const [importedPaths, setImportedPaths] = useState<Sound[]>([]);
 	const [error, setError] = useState<string | null>(null);
+	const [loadingPath, setLoadingPath] = useState<string | null>(null);
 
 	useEffect(() => {
 		const loadPaths = async () => {
@@ -39,6 +40,7 @@ const FileImporter = () => {
 	};
 
 	const handleRemove = async (path: string) => {
+		setLoadingPath(path);
 		try {
 			await removeImportedPath(path);
 			await recacheSounds();
@@ -47,6 +49,8 @@ const FileImporter = () => {
 		} catch (err) {
 			console.error('Fehler beim Entfernen des Ordners:', err);
 			setError('Failed to remove folder.');
+		} finally {
+			setLoadingPath(null);
 		}
 	};
 
@@ -86,8 +90,10 @@ const FileImporter = () => {
 									{sound.name}
 								</span>
 								<Button
-									icon={Trash}
+									content='Remove'
 									onClick={() => handleRemove(sound.path)}
+									loading={loadingPath === sound.path}
+									disabled={loadingPath === sound.path}
 								/>
 							</div>
 						))
