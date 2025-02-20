@@ -1,4 +1,4 @@
-import { SlidersHorizontal } from 'lucide-react';
+import { Book, SlidersHorizontal } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { SoundList } from '../components/library/Soundlist';
 import { Button } from '../components/ui/Button/Button';
@@ -11,11 +11,10 @@ const Library = () => {
 	const [filters, setFilters] = useState({
 		search: '',
 		tags: [] as string[],
-		sortBy: 'date',
 	});
 
 	const handleFiltersChange = useCallback(
-		(newFilters: { search: string; tags: string[]; sortBy: string }) => {
+		(newFilters: { search: string; tags: string[] }) => {
 			setFilters((prev) => ({ ...prev, ...newFilters }));
 		},
 		[]
@@ -46,10 +45,13 @@ const Library = () => {
 					className='fixed right-4 bottom-4 z-50 shadow-lg shadow-neutral-900/20 backdrop-blur-sm lg:hidden'
 				/>
 
-				<div className='flex-1 rounded-xl border-neutral-800 sm:border sm:p-4'>
-					<h1 className='mb-4 text-xl font-medium lg:text-2xl'>
-						Library
-					</h1>
+				<div className='flex-1 rounded-xl'>
+					<div className='mb-6 flex items-center space-x-2'>
+						<Book className='h-6 w-6 text-neutral-700' />
+						<h1 className='text-2xl font-semibold tracking-tight'>
+							Library
+						</h1>
+					</div>
 					<SoundList
 						searchQuery={filters.search}
 						selectedTags={new Set(filters.tags)}

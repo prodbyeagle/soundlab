@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getSounds } from '../../lib/soundImport';
 import { SearchBar } from './SearchBar';
-import { Select } from '../ui/Select/Select';
 import { Button } from '../ui/Button/Button';
 
 interface SidebarProps {
@@ -9,19 +8,11 @@ interface SidebarProps {
 	onFiltersChange: (filters: {
 		search: string;
 		tags: string[];
-		sortBy: string;
 	}) => void;
 }
 
-const sortOptions = [
-	{ value: 'date', label: 'Newest' },
-	{ value: 'popularity', label: 'Most Popular' },
-	{ value: 'length', label: 'Length' },
-];
-
 export const Sidebar = ({ className = '', onFiltersChange }: SidebarProps) => {
 	const [search, setSearch] = useState('');
-	const [sortBy, setSortBy] = useState(sortOptions[0].value);
 	const [availableTags, setAvailableTags] = useState<string[]>([]);
 	const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
@@ -45,9 +36,8 @@ export const Sidebar = ({ className = '', onFiltersChange }: SidebarProps) => {
 		onFiltersChange({
 			search,
 			tags: [...selectedTags],
-			sortBy,
 		});
-	}, [search, selectedTags, sortBy]);
+	}, [search, selectedTags]);
 
 	const toggleTag = (tag: string) => {
 		setSelectedTags((prev) => {
@@ -89,21 +79,11 @@ export const Sidebar = ({ className = '', onFiltersChange }: SidebarProps) => {
 			</div>
 
 			<div className='mt-6'>
-				<h3 className='mb-3 text-sm font-medium'>Sort By</h3>
-				<Select
-					value={sortBy}
-					onChange={setSortBy}
-					options={sortOptions}
-				/>
-			</div>
-
-			<div className='mt-6'>
 				<Button
 					variant='danger'
 					className='w-full'
 					onClick={() => {
 						setSearch('');
-						setSortBy(sortOptions[0].value);
 						setSelectedTags(new Set());
 					}}>
 					Reset Filters
