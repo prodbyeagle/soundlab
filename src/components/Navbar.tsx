@@ -67,7 +67,7 @@ const Navbar: React.FC = () => {
           Library
         </NavLink>
 
-        <NavLink disabled to="/favorites" icon={Star}>
+        <NavLink to="/favorites" icon={Star}>
           Favorites
         </NavLink>
 

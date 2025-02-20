@@ -5,6 +5,7 @@ import {
 	getImportedPaths,
 	importDirectory,
 	removeImportedPath,
+	recacheSounds,
 } from '../lib/soundImport';
 import type { Sound } from '../types/Sound';
 
@@ -40,8 +41,7 @@ const FileImporter = () => {
 	const handleRemove = async (path: string) => {
 		try {
 			await removeImportedPath(path);
-
-			//? recall the get imported paths to update the frontend with the new folder paths.
+			await recacheSounds();
 			const sounds = await getImportedPaths();
 			setImportedPaths(sounds);
 		} catch (err) {

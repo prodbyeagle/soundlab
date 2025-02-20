@@ -1,17 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getSounds } from '../../lib/soundImport';
 import SearchBar from './SearchBar';
 import { Select } from '../ui/Select/Select';
 import { Button } from '../ui/Button/Button';
 
-// will be changed to real data
-const categories = [
-	{ id: '808', label: '808' },
-	{ id: 'kick', label: 'Kick' },
-	{ id: 'snare', label: 'Snare' },
-	{ id: 'hihat', label: 'HiHat' },
-	{ id: 'clap', label: 'Clap' },
-	{ id: 'perc', label: 'Percussion' },
-];
+interface SidebarProps {
+	className?: string;
+	onFiltersChange: (filters: {
+		search: string;
+		tags: string[];
+		sortBy: string;
+	}) => void;
+}
 
 const sortOptions = [
 	{ value: 'date', label: 'Newest' },
@@ -19,20 +19,40 @@ const sortOptions = [
 	{ value: 'length', label: 'Length' },
 ];
 
-interface SidebarProps {
-	className?: string;
-}
-
-const Sidebar = ({ className = '' }: SidebarProps) => {
+const Sidebar = ({ className = '', onFiltersChange }: SidebarProps) => {
+	const [search, setSearch] = useState('');
 	const [sortBy, setSortBy] = useState(sortOptions[0].value);
-	const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
-		new Set()
-	);
+	const [availableTags, setAvailableTags] = useState<string[]>([]);
+	const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
-	const toggleCategory = (id: string) => {
-		setSelectedCategories((prev) => {
+	useEffect(() => {
+		const fetchTags = async () => {
+			try {
+				const sounds = await getSounds();
+				const tags = [
+					...new Set(sounds.flatMap((sound) => sound.tags)),
+				];
+				setAvailableTags(tags);
+			} catch (error) {
+				console.error('Error fetching tags:', error);
+			}
+		};
+
+		fetchTags();
+	}, []);
+
+	useEffect(() => {
+		onFiltersChange({
+			search,
+			tags: [...selectedTags],
+			sortBy,
+		});
+	}, [search, selectedTags, sortBy]);
+
+	const toggleTag = (tag: string) => {
+		setSelectedTags((prev) => {
 			const newSet = new Set(prev);
-			newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+			newSet.has(tag) ? newSet.delete(tag) : newSet.add(tag);
 			return newSet;
 		});
 	};
@@ -42,23 +62,29 @@ const Sidebar = ({ className = '' }: SidebarProps) => {
 			className={`rounded-xl border border-neutral-800 bg-neutral-950 p-4 lg:w-2xs ${className}`}>
 			<h2 className='mb-4 text-xl font-medium'>Filters</h2>
 
-			<SearchBar />
+			<SearchBar value={search} onChange={setSearch} />
 
 			<div className='mt-6'>
-				<h3 className='mb-3 text-sm font-medium'>Categories</h3>
+				<h3 className='mb-3 text-sm font-medium'>Tags</h3>
 				<div className='grid grid-cols-2 gap-2 sm:flex sm:flex-wrap'>
-					{categories.map((category) => (
-						<button
-							key={category.id}
-							onClick={() => toggleCategory(category.id)}
-							className={`w-full rounded border px-3 py-1 text-sm transition-colors duration-300 sm:w-auto ${
-								selectedCategories.has(category.id)
-									? 'border-neutral-600 bg-neutral-800'
-									: 'border-neutral-800 hover:bg-neutral-900'
-							}`}>
-							{category.label}
-						</button>
-					))}
+					{availableTags.length > 0 ? (
+						availableTags.map((tag) => (
+							<button
+								key={tag}
+								onClick={() => toggleTag(tag)}
+								className={`w-full rounded border px-3 py-1 text-sm transition-colors duration-300 sm:w-auto ${
+									selectedTags.has(tag)
+										? 'border-neutral-600 bg-neutral-800'
+										: 'border-neutral-800 hover:bg-neutral-900'
+								}`}>
+								{tag}
+							</button>
+						))
+					) : (
+						<p className='text-sm text-neutral-500'>
+							No tags available
+						</p>
+					)}
 				</div>
 			</div>
 
@@ -76,8 +102,9 @@ const Sidebar = ({ className = '' }: SidebarProps) => {
 					variant='danger'
 					className='w-full'
 					onClick={() => {
+						setSearch('');
 						setSortBy(sortOptions[0].value);
-						setSelectedCategories(new Set());
+						setSelectedTags(new Set());
 					}}>
 					Reset Filters
 				</Button>

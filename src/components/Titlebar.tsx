@@ -45,7 +45,7 @@ const Titlebar = () => {
 				data-tauri-drag-region
 				className='pointer-events-none flex items-center gap-2 px-3 py-1.5'>
 				<img src="./icon.png" alt='Logo' className='h-5' />
-				<span className='text-sm font-medium text-neutral-300'>
+				<span className='text-xs font-medium text-neutral-300'>
 					SoundLab
 				</span>
 			</div>
@@ -71,7 +71,7 @@ const Titlebar = () => {
 
 				<button
 					onClick={handleClose}
-					className='flex h-full w-10 items-center justify-center text-neutral-400 transition-colors hover:bg-red-600 hover:text-white'
+					className='flex h-full w-10 items-center justify-center text-neutral-400 transition-colors hover:bg-red-500 hover:text-white'
 					aria-label='Close'>
 					<X size={16} />
 				</button>

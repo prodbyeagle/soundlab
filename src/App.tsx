@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SoundProvider } from './context/SoundContext';
 import Library from './pages/Library';
 import Settings from './pages/Settings';
+import { Favorites } from './pages/Favorites';
 import Titlebar from './components/Titlebar';
 import { useEffect } from 'react';
 
@@ -24,7 +25,7 @@ const App = () => {
 				<BrowserRouter>
 					<Routes>
 						<Route path='/' element={<Library />} />
-						{/* <Route path='/favorites' element={<Favorites />} /> */}
+						<Route path='/favorites' element={<Favorites />} />
 						<Route path='/settings' element={<Settings />} />
 					</Routes>
 				</BrowserRouter>

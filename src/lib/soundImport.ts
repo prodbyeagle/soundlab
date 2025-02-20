@@ -11,11 +11,19 @@ export async function importSound(name: string, path: string): Promise<void> {
 	}
 }
 
+export async function recacheSounds(): Promise<void> {
+	try {
+		await invoke('recache_sounds');
+	} catch (error) {
+		console.error('Error recaching sounds:', error);
+		throw error;
+	}
+}
+
 export async function importDirectory(): Promise<void> {
 	try {
 		const selected = await open({ directory: true });
 		if (!selected) return;
-
 		await invoke('import_directory', { dirPath: selected });
 	} catch (error) {
 		console.error('Error importing directory:', error);
@@ -29,13 +37,15 @@ export const getSounds = async (): Promise<Sound[]> => {
 			id: string;
 			name: string;
 			path: string;
+			is_favorite: boolean;
+			tags: string[];
 		}[];
-
 		return sounds.map((sound) => ({
 			id: parseInt(sound.id, 10),
 			name: sound.name,
 			path: sound.path,
-			isFavorite: false,
+			is_favorite: sound.is_favorite,
+			tags: sound.tags,
 		}));
 	} catch (error) {
 		console.error('Error fetching sounds:', error);
@@ -55,13 +65,13 @@ export async function deleteSound(id: string): Promise<void> {
 export async function getImportedPaths(): Promise<Sound[]> {
 	try {
 		const paths = (await invoke('get_imported_paths')) as string[];
-
 		return paths.map((path, index) => ({
 			id: index + 1,
-			//! maybe change logic so we can use the "real" name of the sound. but this works too.
+			// Der Name wird aus dem Dateipfad abgeleitet
 			name: path.split('\\').pop()?.split('/').pop() ?? 'Unknown Sound',
 			path,
-			isFavorite: false,
+			is_favorite: false,
+			tags: [],
 		}));
 	} catch (error) {
 		console.error('Error fetching imported paths:', error);
@@ -78,10 +88,9 @@ export async function removeImportedPath(path: string): Promise<void> {
 	}
 }
 
-export async function toggleFavorite(id: string): Promise<string> {
+export async function toggleFavorite(id: number): Promise<string> {
 	try {
 		const result = await invoke('toggle_favorite', { id });
-
 		return result as string;
 	} catch (error) {
 		console.error('Error toggling sound favorite status:', error);

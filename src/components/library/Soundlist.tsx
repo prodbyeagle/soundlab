@@ -1,18 +1,21 @@
-import { useEffect, useState } from 'react';
-import SoundCard from './SoundCard';
-import { getSounds } from '../../lib/soundImport';
+import { useEffect, useState, useMemo } from 'react';
+import { SoundCard } from './SoundCard';
+import { getSounds, toggleFavorite } from '../../lib/soundImport';
 import type { Sound } from '../../types/Sound';
 
-const SoundList = () => {
+interface SoundListProps {
+	searchQuery: string;
+	selectedTags: Set<string>;
+}
+
+export const SoundList = ({ searchQuery, selectedTags }: SoundListProps) => {
 	const [sounds, setSounds] = useState<Sound[]>([]);
-	const [favorites, setFavorites] = useState<number[]>([]);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		const fetchSounds = async () => {
 			try {
-				const importedSounds = await getSounds();
-
+				const importedSounds: Sound[] = await getSounds();
 				setSounds(importedSounds);
 			} catch (err) {
 				console.error(
@@ -26,42 +29,57 @@ const SoundList = () => {
 		fetchSounds();
 	}, []);
 
-	const toggleFavorite = (index: number) => {
-		toggleFavorite(index);
-		setFavorites((prev) =>
-			prev.includes(index)
-				? prev.filter((i) => i !== index)
-				: [...prev, index]
-		);
+	const handleToggleFavorite = async (id: number) => {
+		try {
+			await toggleFavorite(id);
+			setSounds((prev) =>
+				prev.map((sound) =>
+					sound.id === id
+						? { ...sound, is_favorite: !sound.is_favorite }
+						: sound
+				)
+			);
+		} catch (err) {
+			console.error('Error toggling favorite:', err);
+		}
 	};
+
+	const filteredSounds = useMemo(() => {
+		return sounds.filter((sound) => {
+			const matchesSearch =
+				searchQuery.length === 0 ||
+				sound.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+			const matchesTags =
+				selectedTags.size === 0 ||
+				sound.tags.some((tag) => selectedTags.has(tag));
+
+			return matchesSearch && matchesTags;
+		});
+	}, [sounds, searchQuery, selectedTags]);
 
 	return (
 		<div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
 			{error ? (
 				<p className='text-center text-red-500'>{error}</p>
-			) : sounds.length === 0 ? (
+			) : filteredSounds.length === 0 ? (
 				<p className='text-center text-neutral-500'>
-					No sounds imported yet.
+					No matching sounds found.
 				</p>
 			) : (
-				sounds.map((sound, index) => {
-					return (
-						<SoundCard
-							key={index}
-							index={index}
-							name={sound.name}
-							path={sound.path}
-							isPlaying={false}
-							//! the console is just an placeholder, will update when the "play" system works
-							onPlay={() => console.log('123')}
-							isFavorite={favorites.includes(index)}
-							onToggleFavorite={toggleFavorite}
-						/>
-					);
-				})
+				filteredSounds.map((sound) => (
+					<SoundCard
+						key={sound.id}
+						index={sound.id}
+						name={sound.name}
+						path={sound.path}
+						isPlaying={false}
+						onPlay={() => console.log('Play sound', sound.name)}
+						is_favorite={sound.is_favorite}
+						onToggleFavorite={() => handleToggleFavorite(sound.id)}
+					/>
+				))
 			)}
 		</div>
 	);
 };
-
-export default SoundList;
