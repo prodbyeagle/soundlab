@@ -44,9 +44,12 @@ const Titlebar = () => {
 			<div
 				data-tauri-drag-region
 				className='pointer-events-none flex items-center gap-2 px-3 py-1.5'>
-				<img src="./icon.png" alt='Logo' className='h-5' />
+				<img src='./icon.png' alt='Logo' className='h-5' />
 				<span className='text-xs font-medium text-neutral-300'>
 					SoundLab
+				</span>
+				<span className='text-xs font-medium text-neutral-600'>
+					ALPHA
 				</span>
 			</div>
 
